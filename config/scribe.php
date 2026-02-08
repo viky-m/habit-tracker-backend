@@ -12,22 +12,22 @@ return [
     'title' => 'Habit Tracker API Documentation',
 
     // A short description of your API. Will be included in the docs webpage, Postman collection and OpenAPI spec.
-    'description' => 'API для гейміфікованого трекера звичок з 3D героями',
+    'description' => 'API for Gamified Habit Tracker with 3D Heroes',
 
     // Text to place in the "Introduction" section, right after the `description`. Markdown and HTML are supported.
     'intro_text' => <<<INTRO
 <aside>
-Ця документація надає всю інформацію для роботи з Habit Tracker API.
+This documentation provides all information for working with the Habit Tracker API.
 
-Підтримує:
-- ✅ Email/Password авторизацію
+Supports:
+- ✅ Email/Password Authorization
 - ✅ Apple Sign-In
-- ✅ Google Sign-In  
-- ✅ CRUD операції зі звичками
-- ✅ Систему геймифікації з 3D героями
-- ✅ Мультимовність (en, uk)
+- ✅ Google Sign-In
+- ✅ Habit CRUD operations
+- ✅ Gamification system with 3D heroes
+- ✅ Multi-language (en, uk)
 
-Більшість endpoints вимагають Bearer token авторизації.
+Most endpoints require Bearer token authorization.
 </aside>
 INTRO,
 

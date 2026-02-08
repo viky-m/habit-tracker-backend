@@ -101,7 +101,7 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request): JsonResponse
     {
-        if (! Auth::attempt($request->only('email', 'password'))) {
+        if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
                 'message' => 'Invalid credentials',
             ], 401);
@@ -114,6 +114,7 @@ class AuthController extends Controller
             'message' => 'Login successful',
             'user' => new UserResource($user),
             'token' => $token,
+            'token_type' => 'Bearer',
         ]);
     }
 
@@ -142,7 +143,7 @@ class AuthController extends Controller
      */
     public function socialLogin(SocialLoginRequest $request, GamificationService $gamification): JsonResponse
     {
-        $providerIdField = $request->provider.'_id';
+        $providerIdField = $request->provider . '_id';
 
         // Try to find user by provider ID first
         $user = User::where($providerIdField, $request->provider_id)->first();
@@ -150,7 +151,7 @@ class AuthController extends Controller
         $isNewUser = false;
         $firstHero = null;
 
-        if (! $user) {
+        if (!$user) {
             // If not found by provider ID, try to find by email (link existing account)
             if ($request->email) {
                 $user = User::where('email', $request->email)->first();
@@ -165,7 +166,7 @@ class AuthController extends Controller
             }
 
             // If still no user, create a new one
-            if (! $user) {
+            if (!$user) {
                 $user = User::create([
                     'name' => $request->name,
                     'email' => $request->email,
@@ -217,7 +218,7 @@ class AuthController extends Controller
         $token = Auth::user()->currentAccessToken();
 
         // Check if it's not a transient token (used in tests with Sanctum::actingAs)
-        if ($token && ! ($token instanceof \Laravel\Sanctum\TransientToken)) {
+        if ($token && !($token instanceof \Laravel\Sanctum\TransientToken)) {
             $token->delete();
         }
 

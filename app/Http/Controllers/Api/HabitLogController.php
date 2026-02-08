@@ -20,17 +20,17 @@ class HabitLogController extends Controller
      *     path="/habits/{habit}/log",
      *     tags={"Habit Logs"},
      *     summary="Log habit completion",
-     *     description="Відмітити виконання звички",
+     *     description="Mark habit as completed",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(name="habit", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\RequestBody(
      *         @OA\JsonContent(
      *             @OA\Property(property="completed_at", type="string", format="date", example="2025-10-29"),
-     *             @OA\Property(property="note", type="string", example="Відчував себе чудово!"),
+     *             @OA\Property(property="note", type="string", example="Felt great!"),
      *             @OA\Property(property="count", type="integer", example=1)
      *         )
      *     ),
-     *     @OA\Response(response=201, description="Виконання зареєстровано")
+     *     @OA\Response(response=201, description="Habit completion logged")
      * )
      */
     public function store(
@@ -38,8 +38,7 @@ class HabitLogController extends Controller
         Habit $habit,
         GamificationServiceContract $gamification,
         AchievementServiceContract $achievements
-    ): JsonResponse
-    {
+    ): JsonResponse {
         $this->authorize('view', $habit);
 
         $log = $habit->logs()->updateOrCreate(
@@ -75,7 +74,7 @@ class HabitLogController extends Controller
                 'streak' => $streakInfo,
             ],
             'achievements' => [
-                'newly_unlocked' => $newAchievements->map(fn ($a) => [
+                'newly_unlocked' => $newAchievements->map(fn($a) => [
                     'id' => $a->id,
                     'title' => $a->title,
                     'icon' => $a->icon,
@@ -91,10 +90,10 @@ class HabitLogController extends Controller
      *     path="/habits/{habit}/logs",
      *     tags={"Habit Logs"},
      *     summary="Get habit logs",
-     *     description="Історія виконань звички",
+     *     description="History of habit executions",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(name="habit", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Список логів")
+     *     @OA\Response(response=200, description="List of logs")
      * )
      */
     public function index(Habit $habit): AnonymousResourceCollection
@@ -111,10 +110,10 @@ class HabitLogController extends Controller
      *     path="/habits/{habit}/stats",
      *     tags={"Habit Logs"},
      *     summary="Get habit statistics",
-     *     description="Статистика виконання звички",
+     *     description="Habit execution statistics",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(name="habit", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Статистика")
+     *     @OA\Response(response=200, description="Statistics")
      * )
      */
     public function stats(Habit $habit): JsonResponse

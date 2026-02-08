@@ -20,10 +20,10 @@ class UserHeroController extends Controller
      *     path="/user/heroes",
      *     tags={"User Heroes"},
      *     summary="Get user's heroes",
-     *     description="Герої користувача",
+     *     description="User's heroes",
      *     security={{"bearerAuth":{}}},
      *
-     *     @OA\Response(response=200, description="Список героїв користувача")
+     *     @OA\Response(response=200, description="List of user's heroes")
      * )
      */
     public function index(): AnonymousResourceCollection
@@ -38,17 +38,17 @@ class UserHeroController extends Controller
      *     path="/user/heroes/active",
      *     tags={"User Heroes"},
      *     summary="Get active hero",
-     *     description="Поточний активний герой",
+     *     description="Current active hero",
      *     security={{"bearerAuth":{}}},
      *
-     *     @OA\Response(response=200, description="Активний герой")
+     *     @OA\Response(response=200, description="Active hero")
      * )
      */
     public function active(): UserHeroResource|JsonResponse
     {
         $activeHero = Auth::user()->activeHero()->with('hero')->first();
 
-        if (! $activeHero) {
+        if (!$activeHero) {
             return response()->json(['message' => 'No active hero'], 404);
         }
 
@@ -60,12 +60,12 @@ class UserHeroController extends Controller
      *     path="/user/heroes/{hero}/unlock",
      *     tags={"User Heroes"},
      *     summary="Unlock hero",
-     *     description="Розблокувати героя",
+     *     description="Unlock a hero",
      *     security={{"bearerAuth":{}}},
      *
      *     @OA\Parameter(name="hero", in="path", required=true, @OA\Schema(type="integer")),
      *
-     *     @OA\Response(response=201, description="Герой розблоковано")
+     *     @OA\Response(response=201, description="Hero unlocked")
      * )
      */
     public function unlock(Hero $hero): UserHeroResource
@@ -90,12 +90,12 @@ class UserHeroController extends Controller
      *     path="/user/heroes/{userHero}/activate",
      *     tags={"User Heroes"},
      *     summary="Activate hero",
-     *     description="Активувати героя",
+     *     description="Activate a hero",
      *     security={{"bearerAuth":{}}},
      *
      *     @OA\Parameter(name="userHero", in="path", required=true, @OA\Schema(type="integer")),
      *
-     *     @OA\Response(response=200, description="Герой активовано")
+     *     @OA\Response(response=200, description="Hero activated")
      * )
      */
     public function activate(UserHero $userHero): UserHeroResource

@@ -11,12 +11,12 @@ class HealthController extends Controller
     #[OA\Get(
         path: '/health',
         summary: 'Health check endpoint',
-        description: 'Перевіряє статус API. Не вимагає авторизації.',
+        description: 'Checks API status. Does not require authentication.',
         tags: ['System'],
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'API працює нормально',
+                description: 'API is working normally',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'status', type: 'string', example: 'ok'),

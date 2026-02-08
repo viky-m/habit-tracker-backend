@@ -14,7 +14,7 @@ class HeroController extends Controller
      *     path="/heroes",
      *     tags={"Heroes"},
      *     summary="Get all heroes",
-     *     description="Список усіх доступних героїв",
+     *     description="List of all available heroes",
      *     security={{"bearerAuth":{}}},
      *
      *     @OA\Parameter(
@@ -26,7 +26,7 @@ class HeroController extends Controller
      *
      *     @OA\Response(
      *         response=200,
-     *         description="Список героїв",
+     *         description="List of heroes",
      *
      *         @OA\JsonContent(
      *             type="array",
@@ -61,12 +61,12 @@ class HeroController extends Controller
      *     path="/heroes/{id}",
      *     tags={"Heroes"},
      *     summary="Get hero details",
-     *     description="Деталі героя",
+     *     description="Hero details",
      *     security={{"bearerAuth":{}}},
      *
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *
-     *     @OA\Response(response=200, description="Деталі героя")
+     *     @OA\Response(response=200, description="Hero details")
      * )
      */
     public function show(Hero $hero): HeroResource

@@ -243,8 +243,8 @@
         async function createHabit() {
             try {
                 const response = await axios.post(`${API_URL}/habits`, {
-                    title: '🏃 Пробіжка',
-                    description: 'Бігати щоранку 30 хвилин',
+                    title: '🏃 Morning Run',
+                    description: 'Run every morning for 30 minutes',
                     icon: '🏃',
                     color: '#10b981',
                     frequency: 'daily',
@@ -262,7 +262,7 @@
             try {
                 const response = await axios.post(`${API_URL}/habits/1/log`, {
                     count: 1,
-                    note: 'Відчував себе чудово! 💪'
+                    note: 'Felt great! 💪'
                 }, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
