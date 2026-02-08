@@ -15,7 +15,7 @@
         .json-number { color: #f59e0b; }
         .json-boolean { color: #8b5cf6; }
         .json-null { color: #ef4444; }
-        pre { 
+        pre {
             background: #1e293b;
             color: #e2e8f0;
             padding: 1.5rem;
@@ -38,7 +38,7 @@
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
                     <h2 class="text-2xl font-bold mb-4">📡 API Endpoints</h2>
-                    
+
                     <!-- Auth Section -->
                     <div class="mb-6">
                         <h3 class="font-semibold text-lg mb-2 text-purple-600">🔐 Authentication</h3>
@@ -105,7 +105,7 @@
                     <!-- Token Input -->
                     <div class="mt-6 pt-6 border-t">
                         <label class="block text-sm font-medium mb-2">🔑 Bearer Token</label>
-                        <input type="text" id="token" placeholder="Paste your token here" 
+                        <input type="text" id="token" placeholder="Paste your token here"
                                class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-purple-500 text-sm font-mono">
                         <button onclick="quickLogin()" class="mt-2 w-full bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition">
                             Quick Login (test@example.com)
@@ -121,7 +121,7 @@
                         <h2 class="text-2xl font-bold">📤 Response</h2>
                         <div id="status" class="text-sm"></div>
                     </div>
-                    
+
                     <div id="request-info" class="mb-4 p-4 bg-gray-50 rounded hidden">
                         <div class="text-sm space-y-1">
                             <p><strong>Method:</strong> <span id="req-method"></span></p>
@@ -131,7 +131,7 @@
                     </div>
 
                     <div id="response" class="text-gray-500 text-center py-12">
-                        👆 Виберіть endpoint зліва для тестування
+                        👆 Choose endpoint in left for test
                     </div>
                 </div>
             </div>
@@ -164,7 +164,7 @@
             document.getElementById('req-url').textContent = url;
             document.getElementById('req-status').textContent = status;
             document.getElementById('req-status').className = status >= 200 && status < 300 ? 'text-green-600 font-bold' : 'text-red-600 font-bold';
-            
+
             const formatted = syntaxHighlight(JSON.stringify(data, null, 2));
             document.getElementById('response').innerHTML = `<pre class="text-left">${formatted}</pre>`;
         }
@@ -194,11 +194,11 @@
                     email: 'test@example.com',
                     password: 'password123'
                 });
-                
+
                 token = response.data.token;
                 document.getElementById('token').value = token;
                 localStorage.setItem('api_token', token);
-                
+
                 showResponse('POST', '/auth/login', response.status, response.data);
                 alert('✅ Logged in successfully! Token saved.');
             } catch (error) {

@@ -42,7 +42,7 @@ services:
     environment:
       PHP_IDE_CONFIG: serverName=php
       XDEBUG_IDE_KEY: PHPSTORM
-      XDEBUG_REMOTE_AUTOSTART: '1'
+      XDEBUG_REMOTE_AUTOSTART: "0"
       XDEBUG_REMOTE_HOST: ${XDEBUG_REMOTE_HOST}
       XDEBUG_REMOTE_PORT: ${XDEBUG_REMOTE_PORT}
     volumes:
@@ -64,4 +64,3 @@ services:
     container_name: habittracker_redis
     ports:
       - ${REDIS_PORT}:6379
-
