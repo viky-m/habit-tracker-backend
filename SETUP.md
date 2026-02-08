@@ -1,154 +1,154 @@
 # ⚙️ Setup Instructions
 
-Покрокова інструкція для запуску проекту
+Step-by-step instructions for running the project
 
 ---
 
-## 🚀 Швидкий старт (3 хвилини)
+## 🚀 Quick Start (3 minutes)
 
 ```bash
-# 1. Запустити Docker
+# 1. Start Docker
 docker-compose up -d
 
-# 2. Встановити залежності
+# 2. Install dependencies
 docker exec habittracker_php composer install
 
-# 3. Налаштувати базу даних
+# 3. Setup database
 docker exec habittracker_php php artisan migrate
 docker exec habittracker_php php artisan db:seed --class=HeroSeeder
 
-# 4. Згенерувати документацію
+# 4. Generate documentation
 docker exec habittracker_php php artisan scribe:generate
 
-# 5. Відкрити документацію
+# 5. Open documentation
 # http://localhost:8081/docs
 ```
 
 ---
 
-## 📋 Детальна інструкція
+## 📋 Detailed Instructions
 
-### 1. Вимоги:
+### 1. Requirements:
 - Docker 20.10+
 - Docker Compose 2.0+
-- 2GB вільного місця
+- 2GB free space
 
-### 2. Клонувати репозиторій:
+### 2. Clone repository:
 ```bash
 git clone <repository-url>
 cd habit-tracker-backend
 ```
 
-### 3. Налаштувати environment:
+### 3. Configure environment:
 ```bash
-# .env вже є, але можна створити з прикладу
+# .env already exists, but you can create it from example
 cp .env.example .env
 
-# Перевірити порти в .env:
+# Check ports in .env:
 # HTTP_PORT=8081
 # MYSQL_PORT=3307
 # REDIS_PORT=6380
 ```
 
-### 4. Запустити Docker:
+### 4. Start Docker:
 ```bash
 docker-compose up -d
 
-# Перевірити що всі контейнери запущені
+# Verify all containers are running
 docker-compose ps
 ```
 
-Має бути 5 контейнерів:
+There should be 5 containers:
 - `habittracker_nginx` (port 8081)
 - `habittracker_php` (port 9000)
 - `habittracker_mysql` (port 3307)
 - `habittracker_redis` (port 6380)
 - `habittracker_mailhog` (ports 1026, 8026)
 
-### 5. Встановити Laravel залежності:
+### 5. Install Laravel dependencies:
 ```bash
 docker exec habittracker_php composer install
 ```
 
-### 6. Згенерувати application key:
+### 6. Generate application key:
 ```bash
 docker exec habittracker_php php artisan key:generate
 ```
 
-### 7. Запустити міграції:
+### 7. Run migrations:
 ```bash
 docker exec habittracker_php php artisan migrate
 ```
 
-### 8. Створити starter heroes:
+### 8. Create starter heroes:
 ```bash
 docker exec habittracker_php php artisan db:seed --class=HeroSeeder
 ```
 
-Створить 4 героїв:
+Creates 4 heroes:
 - Warrior (Level 0, Free)
 - Sage (Level 5)
 - Guardian (Level 10)
 - Phoenix (Level 20, Premium)
 
-### 9. Згенерувати API документацію:
+### 9. Generate API documentation:
 ```bash
 docker exec habittracker_php php artisan scribe:generate
 ```
 
-### 10. Перевірити що все працює:
+### 10. Check that everything works:
 ```bash
 # Health check
 curl http://localhost:8081/api/health
 
-# Відповідь має бути:
+# Response should be:
 # {"status":"ok","timestamp":"...","version":"1.0.0"}
 ```
 
-### 11. Відкрити документацію:
+### 11. Open documentation:
 - **Scribe:** http://localhost:8081/docs
 - **API Playground:** http://localhost:8081/playground
 
 ---
 
-## 🧪 Запустити тести:
+## 🧪 Run tests:
 
 ```bash
 docker exec habittracker_php php artisan test
 
-# Очікуваний результат:
+# Expected result:
 # Tests: 72 passed (211 assertions)
 ```
 
 ---
 
-## 🔧 Корисні команди
+## 🔧 Useful Commands
 
 ### Docker:
 ```bash
-# Зупинити
+# Stop
 docker-compose down
 
-# Перезапустити
+# Restart
 docker-compose restart
 
-# Логи
+# Logs
 docker-compose logs -f php
 
-# Зайти в PHP контейнер
+# Enter PHP container
 docker exec -it habittracker_php bash
 
-# Зайти в MySQL
+# Enter MySQL
 docker exec -it habittracker_mysql mysql -u habittracker -phabittracker habittracker
 ```
 
 ### Laravel:
 ```bash
-# Очистити кеш
+# Clear cache
 docker exec habittracker_php php artisan cache:clear
 docker exec habittracker_php php artisan config:clear
 
-# Переглянути routes
+# View routes
 docker exec habittracker_php php artisan route:list
 
 # Tinker (interactive shell)
@@ -159,43 +159,43 @@ docker exec -it habittracker_php php artisan tinker
 
 ## ⚠️ Troubleshooting
 
-### Проблема: "Connection refused" при запуску
+### Problem: "Connection refused" on start
 
-**Рішення:**
+**Solution:**
 ```bash
-# Перевірити що всі контейнери запущені
+# Verify all containers are running
 docker-compose ps
 
-# Перезапустити
+# Restart
 docker-compose down
 docker-compose up -d
 ```
 
-### Проблема: "Port already in use"
+### Problem: "Port already in use"
 
-**Рішення:** Змінити порти в `.env`:
+**Solution:** Change ports in `.env`:
 ```env
-HTTP_PORT=8082        # замість 8081
-MYSQL_PORT=3308       # замість 3307
-REDIS_PORT=6381       # замість 6380
+HTTP_PORT=8082        # instead of 8081
+MYSQL_PORT=3308       # instead of 3307
+REDIS_PORT=6381       # instead of 6380
 ```
 
-### Проблема: "Permission denied"
+### Problem: "Permission denied"
 
-**Рішення:**
+**Solution:**
 ```bash
-# Дати права на storage та bootstrap/cache
+# Give permissions to storage and bootstrap/cache
 sudo chmod -R 777 storage bootstrap/cache
 ```
 
 ---
 
-## ✅ Готово!
+## ✅ Done!
 
-Якщо всі кроки виконані, проект має бути доступний на:
+If all steps are completed, the project should be available at:
 - **API:** http://localhost:8081/api
 - **Docs:** http://localhost:8081/docs
 - **Health:** http://localhost:8081/api/health
 
-**Час setup:** ~5 хвилин  
-**Backend готовий до розробки!** 🚀
+**Setup time:** ~5 minutes  
+**Backend ready for development!** 🚀

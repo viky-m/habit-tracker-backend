@@ -1,15 +1,15 @@
 # 🛠️ Development Guide
 
-Правила розробки та code quality standards для Habit Tracker Backend
+Development rules and code quality standards for Habit Tracker Backend
 
 ---
 
 ## 📋 Code Quality Standards
 
-### SOLID Principles (обов'язково!)
+### SOLID Principles (mandatory!)
 
 #### **S - Single Responsibility Principle**
-Один клас = одна відповідальність
+One class = one responsibility
 
 ```php
 // ✅ Good
@@ -31,20 +31,20 @@ class GamificationService {
 ```
 
 #### **O - Open/Closed Principle**
-Відкрито для розширення, закрито для модифікації
+Open for extension, closed for modification
 
 ```php
-// ✅ Good - використовуйте інтерфейси
+// ✅ Good - use interfaces
 interface XpCalculatorContract {
     public function calculate(Habit $habit): int;
 }
 
-// Можна додати нову реалізацію без зміни існуючого коду
+// Can add a new implementation without changing existing code
 class PremiumXpCalculator implements XpCalculatorContract { }
 ```
 
 #### **L - Liskov Substitution Principle**
-Будь-яка реалізація інтерфейсу має працювати однаково
+Any implementation of an interface should work the same way
 
 ```php
 // ✅ Good
@@ -55,7 +55,7 @@ function awardXp(XpCalculatorContract $calculator) {
 ```
 
 #### **I - Interface Segregation Principle**
-Маленькі специфічні інтерфейси замість великих
+Small specific interfaces instead of large ones
 
 ```php
 // ✅ Good
@@ -77,7 +77,7 @@ interface GamificationServiceContract {
 ```
 
 #### **D - Dependency Inversion Principle**
-Залежність від абстракцій, не від конкретних класів
+Depend on abstractions, not on concrete classes
 
 ```php
 // ✅ Good - dependency on interface
@@ -170,7 +170,7 @@ public function process() {
 }
 ```
 
-### 5. **Type Hints скрізь**
+### 5. **Type Hints Everywhere**
 ```php
 // ✅ Good
 public function calculate(Habit $habit): int
@@ -186,28 +186,28 @@ public function getUsers()
 
 ## 🧪 Testing Requirements
 
-### Обов'язкові тести:
+### Mandatory Tests:
 
-#### 1. **Feature Tests для API endpoints:**
+#### 1. **Feature Tests for API endpoints:**
 ```php
 test_user_can_register_with_valid_data()
 test_user_can_login_with_correct_credentials()
 test_habit_log_awards_xp_to_active_hero()
 ```
 
-#### 2. **Unit Tests для бізнес-логіки:**
+#### 2. **Unit Tests for business logic:**
 ```php
 test_xp_calculator_returns_base_xp_for_first_completion()
 test_xp_calculator_adds_streak_bonus_after_three_days()
 test_level_up_service_increases_level_when_enough_xp()
 ```
 
-#### 3. **Coverage мінімум 70%:**
+#### 3. **Minimum Coverage 70%:**
 ```bash
 php artisan test --coverage --min=70
 ```
 
-### Pest Assertions (використовуйте):
+### Pest Assertions (use them):
 ```php
 // HTTP Status
 $response->assertSuccessful();      // 200-299
@@ -231,7 +231,7 @@ $this->assertDatabaseMissing('users', ['email' => 'deleted@example.com']);
 
 ## 🎨 Code Style
 
-### 1. **Laravel Pint (обов'язково перед commit!):**
+### 1. **Laravel Pint (mandatory before commit!):**
 ```bash
 vendor/bin/pint
 ```
@@ -250,7 +250,7 @@ public function calculate(Habit $habit): int
 }
 ```
 
-### 3. **Curly Braces завжди:**
+### 3. **Curly Braces Always:**
 ```php
 // ✅ Good
 if ($condition) {
@@ -284,7 +284,7 @@ public function __construct(UserRepository $repository, XpCalculator $calculator
 ## 🏗️ Architecture Patterns
 
 ### 1. **Service Layer Pattern**
-Бізнес-логіка в сервісах:
+Business logic in services:
 ```
 app/Services/
 ├── Contracts/
@@ -292,14 +292,14 @@ app/Services/
 └── UserService.php
 ```
 
-### 2. **Repository Pattern (через Eloquent)**
+### 2. **Repository Pattern (via Eloquent)**
 ```php
 // Use Eloquent as Repository
 User::where('email', $email)->first();
 Habit::with('logs')->get();
 ```
 
-### 3. **Resource Pattern для API responses:**
+### 3. **Resource Pattern for API responses:**
 ```php
 // ✅ Good
 return new UserResource($user);
@@ -309,7 +309,7 @@ return HabitResource::collection($habits);
 return $user->toArray();
 ```
 
-### 4. **Form Request Pattern для validation:**
+### 4. **Form Request Pattern for validation:**
 ```php
 // ✅ Good
 public function store(StoreHabitRequest $request)
@@ -322,9 +322,9 @@ public function store(Request $request) {
 
 ---
 
-## ⚠️ N+1 Query Prevention (КРИТИЧНО!)
+## ⚠️ N+1 Query Prevention (CRITICAL!)
 
-### **Завжди використовуйте Eager Loading:**
+### **Always use Eager Loading:**
 
 ```php
 // ✅ Good
@@ -340,7 +340,7 @@ foreach ($habits as $habit) {
 }
 ```
 
-### **Use withCount() для підрахунку:**
+### **Use withCount() for counting:**
 ```php
 // ✅ Good
 $users = User::withCount('habits')->get();
@@ -373,7 +373,7 @@ app/
 database/
 ├── migrations/               ← Database schema
 ├── seeders/                  ← Database seeders
-└── factories/                ← Model factories
+├── factories/                ← Model factories
 
 tests/
 ├── Feature/                  ← API/Integration tests
@@ -384,7 +384,7 @@ tests/
 
 ## 🔄 Development Workflow
 
-### 1. **Створити feature:**
+### 1. **Create feature:**
 ```bash
 # 1. Create migration
 php artisan make:migration create_categories_table
@@ -411,7 +411,7 @@ php artisan make:policy CategoryPolicy
 php artisan make:test Feature/CategoryTest --pest
 ```
 
-### 2. **Перевірити код:**
+### 2. **Check code:**
 ```bash
 # Format code
 vendor/bin/pint
@@ -423,7 +423,7 @@ php artisan test
 vendor/bin/phpstan analyse
 ```
 
-### 3. **Оновити документацію:**
+### 3. **Update documentation:**
 ```bash
 php artisan scribe:generate
 ```
@@ -491,29 +491,29 @@ foreach ($users as $user) {
 
 ---
 
-## ✅ Checklist перед Commit
+## ✅ Checklist Before Commit
 
-- [ ] `vendor/bin/pint` виконано
-- [ ] `php artisan test` - всі тести пройшли
-- [ ] PHPDoc додано до публічних методів
-- [ ] Type hints для всіх параметрів та return types
-- [ ] No magic numbers (використані константи)
-- [ ] Eager loading для relationships
-- [ ] SOLID principles дотримано
-- [ ] `php artisan scribe:generate` - документація оновлена
+- [ ] `vendor/bin/pint` run
+- [ ] `php artisan test` - all tests passed
+- [ ] PHPDoc added to public methods
+- [ ] Type hints for all parameters and return types
+- [ ] No magic numbers (used constants)
+- [ ] Eager loading for relationships
+- [ ] SOLID principles followed
+- [ ] `php artisan scribe:generate` - documentation updated
 
 ---
 
 ## 📊 Quality Metrics
 
-### Цільові показники:
+### Target Metrics:
 - **Test Coverage:** ≥ 70%
 - **Lines per Method:** ≤ 20
 - **Lines per Class:** ≤ 300
 - **Cyclomatic Complexity:** ≤ 5
 - **SOLID Compliance:** 100%
 
-### Перевірка:
+### Checking:
 ```bash
 # Test coverage
 php artisan test --coverage
@@ -530,27 +530,27 @@ vendor/bin/phpstan analyse
 ## 🎯 Best Practices
 
 ### Service Layer:
-- ✅ Бізнес-логіка тільки в сервісах
-- ✅ Контролери тільки координують
-- ✅ Використовуйте dependency injection
+- ✅ Business logic in services only
+- ✅ Controllers only coordinate
+- ✅ Use dependency injection
 
 ### Testing:
-- ✅ Feature tests для endpoints
-- ✅ Unit tests для сервісів
-- ✅ Мокуйте external dependencies
-- ✅ Використовуйте factories для test data
+- ✅ Feature tests for endpoints
+- ✅ Unit tests for services
+- ✅ Mock external dependencies
+- ✅ Use factories for test data
 
 ### Database:
-- ✅ Eager loading для relationships
-- ✅ Indexes для часто використовуваних полів
-- ✅ Soft deletes для важливих даних
-- ✅ Transactions для multiple operations
+- ✅ Eager loading for relationships
+- ✅ Indexes for frequently used fields
+- ✅ Soft deletes for important data
+- ✅ Transactions for multiple operations
 
 ### API:
-- ✅ API Resources для responses
-- ✅ Form Requests для validation
-- ✅ Policies для authorization
-- ✅ Rate limiting для production
+- ✅ API Resources for responses
+- ✅ Form Requests for validation
+- ✅ Policies for authorization
+- ✅ Rate limiting for production
 
 ---
 
@@ -565,5 +565,3 @@ vendor/bin/phpstan analyse
 ---
 
 **Follow these rules for high-quality, maintainable code!** 🚀
-
-

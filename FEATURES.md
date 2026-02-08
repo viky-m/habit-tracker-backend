@@ -1,14 +1,14 @@
-# 🎮 Реалізований функціонал
+# 🎮 Implemented Features
 
-Повний список features Habit Tracker Backend API
+Full list of features for Habit Tracker Backend API
 
 ---
 
 ## 🔐 Authentication & Authorization
 
 ### Email/Password Authentication:
-- ✅ Реєстрація нових користувачів
-- ✅ Login з email та password
+- ✅ New user registration
+- ✅ Login with email and password
 - ✅ Password hashing (bcrypt)
 - ✅ Token-based auth (Laravel Sanctum)
 - ✅ Logout (token invalidation)
@@ -17,43 +17,43 @@
 ### Social Authentication:
 - ✅ **Apple Sign-In** integration
 - ✅ **Google Sign-In** integration
-- ✅ Account Linking (прив'язка провайдерів до одного email)
-- ✅ Автоматичне створення користувачів через social providers
-- ✅ Збереження avatars з social accounts
+- ✅ Account Linking (linking providers to one email)
+- ✅ Automatic user creation via social providers
+- ✅ Saving avatars from social accounts
 
 ### Security:
 - ✅ Laravel Sanctum tokens
 - ✅ Bearer authentication
 - ✅ Password validation (min 8 chars)
-- ✅ Email validation та uniqueness
-- ✅ Authorization policies для resources
+- ✅ Email validation and uniqueness
+- ✅ Authorization policies for resources
 
 ---
 
 ## ✅ Habit Management
 
 ### CRUD Operations:
-- ✅ **Create** habits з кастомізацією
-- ✅ **Read** список habits користувача
-- ✅ **Read** деталі окремої habit
+- ✅ **Create** habits with customization
+- ✅ **Read** user's habit list
+- ✅ **Read** individual habit details
 - ✅ **Update** habits (title, frequency, settings)
 - ✅ **Delete** habits (soft delete)
 
 ### Habit Configuration:
-- ✅ **Title** - назва звички
-- ✅ **Description** - опис
-- ✅ **Icon** - емодзі або іконка
+- ✅ **Title** - habit name
+- ✅ **Description** - description
+- ✅ **Icon** - emoji or icon
 - ✅ **Color** - hex color
 - ✅ **Frequency** - daily, weekly, monthly, custom
-- ✅ **Frequency Days** - кастомні дні (пн, ср, пт)
-- ✅ **Target Count** - ціль виконань на день
-- ✅ **Is Active** - активація/деактивація
+- ✅ **Frequency Days** - custom days (Mon, Wed, Fri)
+- ✅ **Target Count** - target completions per day
+- ✅ **Is Active** - activation/deactivation
 
 ### Tracking:
-- ✅ Автоматичний підрахунок total completions
+- ✅ Automatic calculation of total completions
 - ✅ Last completed timestamp
 - ✅ Current streak
-- ✅ Best streak (рекорд)
+- ✅ Best streak (record)
 - ✅ Completion rate calculation
 
 ---
@@ -61,22 +61,22 @@
 ## 📊 Habit Logging
 
 ### Log Completion:
-- ✅ Логування виконання звички
-- ✅ Custom completion date (не обов'язково сьогодні)
+- ✅ Log habit completion
+- ✅ Custom completion date (doesn't have to be today)
 - ✅ Optional note/comment
-- ✅ Count (кількість виконань за раз)
-- ✅ Автоматичне оновлення habit stats
+- ✅ Count (number of completions at once)
+- ✅ Automatic update of habit stats
 
 ### History:
-- ✅ Перегляд всіх логів по звичці
-- ✅ Сортування по даті (desc)
-- ✅ Фільтрація по періоду
+- ✅ View all logs for a habit
+- ✅ Sort by date (desc)
+- ✅ Filter by period
 
 ### Statistics:
 - ✅ Total completions
 - ✅ Current streak
 - ✅ Best streak
-- ✅ Completion rate (30 днів)
+- ✅ Completion rate (30 days)
 - ✅ Last completed date
 - ✅ Is completed today (boolean)
 
@@ -85,29 +85,29 @@
 ## 🎮 Gamification System
 
 ### XP (Experience Points):
-- ✅ **Нарахування XP** при логуванні звички
+- ✅ **Award XP** on habit logging
 - ✅ Base XP: 10 points
-- ✅ **Streak bonus:** +20% кожні 3 дні
+- ✅ **Streak bonus:** +20% every 3 days
 - ✅ Calculation formula: `BASE_XP + (floor(streak/3) * BASE_XP * 0.2)`
-- ✅ Automatic XP award через `XpCalculator` service
+- ✅ Automatic XP award via `XpCalculator` service
 
 ### Level System:
-- ✅ **Automatic level up** при досягненні потрібного XP
+- ✅ **Automatic level up** when required XP is reached
 - ✅ Exponential XP curve (100, 220, 360, 520, 700...)
-- ✅ Multiple levels за раз можливо
+- ✅ Multiple levels at once possible
 - ✅ Level progress tracking
 - ✅ Next level XP calculation
-- ✅ `LevelUpService` з proper logic
+- ✅ `LevelUpService` with proper logic
 
 ### Streak System:
-- ✅ **Автоматичне оновлення** streak при кожному логуванні
+- ✅ **Automatic update** of streak at each logging
 - ✅ Consecutive days → streak++
 - ✅ Missed day → streak = 1 (reset)
 - ✅ Already completed today → no change
-- ✅ Best streak tracking (рекорд)
-- ✅ Weekly milestone detection (кожні 7 днів)
+- ✅ Best streak tracking (record)
+- ✅ Weekly milestone detection (every 7 days)
 
-### Response з Gamification Info:
+### Response with Gamification Info:
 ```json
 {
   "data": { "id": 1, "completed_at": "2025-10-29" },
@@ -135,7 +135,7 @@
 ### Hero Templates (4 starter heroes):
 1. **Warrior** (Common, Level 0, Free)
    - Stats: Strength 10, Endurance 8, Agility 6
-   - Starting hero для всіх користувачів
+   - Starting hero for all users
 
 2. **Sage** (Common, Level 5, 100 XP)
    - Stats: Wisdom 12, Focus 10, Patience 8
@@ -147,17 +147,17 @@
    - Stats: Rebirth 20, Inspiration 18, Transformation 15
 
 ### Hero Management:
-- ✅ List всіх доступних heroes
+- ✅ List all available heroes
 - ✅ View hero details (stats, requirements)
 - ✅ View user's unlocked heroes
 - ✅ View active hero
-- ✅ Unlock hero (якщо є level та XP)
+- ✅ Unlock hero (if level and XP requirements met)
 - ✅ Activate hero (switch between heroes)
 
 ### Hero Progression:
 - ✅ Experience accumulation
-- ✅ Level tracking (окремо для кожного героя)
-- ✅ Stats (JSON field для flexibility)
+- ✅ Level tracking (separately for each hero)
+- ✅ Stats (JSON field for flexibility)
 - ✅ Customization options
 - ✅ Last active timestamp
 
@@ -167,14 +167,14 @@
 
 ### Endpoint: `GET /api/user/stats`
 
-**Показує:**
+**Shows:**
 
 #### Habits Stats:
 - ✅ Total habits count
 - ✅ Active habits count
 - ✅ Completed today count
-- ✅ Completion rate (7 днів)
-- ✅ Completion rate (30 днів)
+- ✅ Completion rate (7 days)
+- ✅ Completion rate (30 days)
 - ✅ Total completions all time
 
 #### Streaks Stats:
@@ -186,23 +186,23 @@
 - ✅ Active hero name
 - ✅ Current level
 - ✅ Current experience
-- ✅ XP до наступного рівня
+- ✅ XP to next level
 - ✅ Progress percentage
 
 #### Achievements:
-- ✅ Placeholder для майбутньої реалізації
+- ✅ Placeholder for future implementation
 
 ---
 
 ## ⚡ Onboarding
 
 ### Automatic First Hero:
-- ✅ При реєстрації через email/password
-- ✅ При реєстрації через Apple/Google
-- ✅ Автоматично створюється "Warrior" hero
-- ✅ Hero одразу активний (is_active = true)
+- ✅ On email/password registration
+- ✅ On Apple/Google registration
+- ✅ "Warrior" hero automatically created
+- ✅ Hero immediately active (is_active = true)
 - ✅ Level 1, 0 XP
-- ✅ Response містить `first_hero` інформацію
+- ✅ Response contains `first_hero` information
 
 **Example Response:**
 ```json
@@ -224,14 +224,14 @@
 
 ### Supported Locales:
 - ✅ `en` - English (default)
-- ✅ `uk` - Українська
+- ✅ `uk` - Ukrainian
 
 ### Implementation:
-- ✅ Locale field в users table
+- ✅ Locale field in users table
 - ✅ Validation: `in:en,uk`
 - ✅ Default locale: `en`
-- ✅ Can be set при registration
-- ✅ Can be set при social login
+- ✅ Can be set at registration
+- ✅ Can be set at social login
 - ✅ Stored with user profile
 
 ---
@@ -239,23 +239,23 @@
 ## 🎯 API Features
 
 ### Request/Response Format:
-- ✅ **JSON тільки** (Content-Type: application/json)
-- ✅ API Resources для structured responses
+- ✅ **JSON only** (Content-Type: application/json)
+- ✅ API Resources for structured responses
 - ✅ Consistent error format
-- ✅ Pagination support (для lists)
+- ✅ Pagination support (for lists)
 - ✅ ISO 8601 timestamps
 
 ### Validation:
-- ✅ Form Requests для всіх endpoints
+- ✅ Form Requests for all endpoints
 - ✅ Custom error messages
 - ✅ Detailed validation errors
-- ✅ 422 status для validation failures
+- ✅ 422 status for validation failures
 
 ### Authorization:
-- ✅ Policies для Habit та UserHero
-- ✅ Перевірка що user може access тільки свої resources
-- ✅ 401 Unauthorized для non-authenticated
-- ✅ 403 Forbidden для non-authorized
+- ✅ Policies for Habit and UserHero
+- ✅ Verification that user can only access their own resources
+- ✅ 401 Unauthorized for non-authenticated
+- ✅ 403 Forbidden for non-authorized
 
 ---
 
@@ -263,20 +263,20 @@
 
 ### Scribe Documentation:
 - ✅ **URL:** http://localhost:8081/docs
-- ✅ Автоматична генерація з PHPDoc
-- ✅ Приклади коду (bash, JavaScript, PHP)
+- ✅ Automatic generation from PHPDoc
+- ✅ Code examples (bash, JavaScript, PHP)
 - ✅ Request/Response examples
 - ✅ Interactive "Try It Out"
-- ✅ Групування по категоріях
+- ✅ Grouping by categories
 - ✅ OpenAPI spec export
 - ✅ Postman collection export
 
 ### Manual Documentation:
-- ✅ `README.md` - Загальний огляд
-- ✅ `SETUP.md` - Інструкції setup
-- ✅ `DEVELOPMENT.md` - Правила розробки
-- ✅ `FEATURES.md` - Цей файл
-- ✅ `FOR_FRONTEND_DEVELOPER.md` - Для frontend
+- ✅ `README.md` - Overall overview
+- ✅ `SETUP.md` - Setup instructions
+- ✅ `DEVELOPMENT.md` - Development rules
+- ✅ `FEATURES.md` - This file
+- ✅ `FOR_FRONTEND_DEVELOPER.md` - For frontend
 - ✅ `FRONTEND_INTEGRATION_GUIDE.md` - Integration examples
 
 ---
@@ -284,22 +284,22 @@
 ## 🏗️ Architecture
 
 ### Design Patterns:
-- ✅ **Service Layer** - бізнес-логіка
-- ✅ **Repository Pattern** - через Eloquent
+- ✅ **Service Layer** - business logic
+- ✅ **Repository Pattern** - via Eloquent
 - ✅ **Facade Pattern** - `GamificationService`
 - ✅ **Strategy Pattern** - `XpCalculatorContract`
-- ✅ **Dependency Injection** - через Service Container
+- ✅ **Dependency Injection** - via Service Container
 
 ### SOLID Principles:
-- ✅ Single Responsibility - кожен клас має одну мету
-- ✅ Open/Closed - розширюється через interfaces
-- ✅ Liskov Substitution - implementations можна міняти
-- ✅ Interface Segregation - специфічні інтерфейси
-- ✅ Dependency Inversion - залежність від abstractions
+- ✅ Single Responsibility - each class has one purpose
+- ✅ Open/Closed - extensible through interfaces
+- ✅ Liskov Substitution - implementations are swappable
+- ✅ Interface Segregation - specific interfaces
+- ✅ Dependency Inversion - depending on abstractions
 
 ### Code Quality:
 - ✅ Laravel Pint (code formatter)
-- ✅ Type hints для всього
+- ✅ Type hints for everything
 - ✅ PHPDoc comments
 - ✅ No magic numbers (constants)
 - ✅ Small methods (< 20 lines)
@@ -312,15 +312,15 @@
 ### Coverage:
 - ✅ 72 tests
 - ✅ 211 assertions
-- ✅ Feature tests для всіх API endpoints
-- ✅ Unit tests для core logic
+- ✅ Feature tests for all API endpoints
+- ✅ Unit tests for core logic
 - ✅ Validation tests
 - ✅ Authorization tests
 
 ### Test Categories:
 - Authentication (21 tests)
 - Habits CRUD (15+ tests)
-- Gamification (covered в Habit Logs)
+- Gamification (covered in Habit Logs)
 - Social Login (all scenarios)
 - Validation (all rules)
 
@@ -379,6 +379,4 @@
 
 ---
 
-**Backend повністю готовий для інтеграції з mobile apps!** 🎊
-
-
+**Backend fully ready for integration with mobile apps!** 🎊

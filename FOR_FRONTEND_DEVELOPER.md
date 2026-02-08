@@ -1,24 +1,25 @@
-# 📱 Для Frontend Розробника - Швидкий старт
+# 📱 For Frontend Developer - Quick Start
 
-## 🎯 **Головне що потрібно знати:**
+## 🎯 **Main things you need to know:**
 
 ---
 
-## 1️⃣ **Документація API:**
+## 1️⃣ **API Documentation:**
 
-### **📚 Swagger UI (ГОЛОВНЕ!):**
-**URL:** http://localhost:8081/api/documentation
+### **📚 Scribe UI (MAIN!):**
+**URL:** http://localhost:8081/docs
 
-**Що там знайдете:**
-- ✅ **Всі 22 endpoints** з детальними описами
-- ✅ **Request схеми** - які поля відправляти
-- ✅ **Response схеми** - що прилетить у відповідь
-- ✅ **Required/Optional** - які поля обов'язкові
-- ✅ **Типи даних** - string, integer, boolean, array
-- ✅ **Приклади** - example values для кожного поля
-- ✅ **Validation rules** - обмеження (min, max, enum)
-- ✅ **Error responses** - всі можливі помилки
-- ✅ **Try it out!** - можна тестувати прямо там
+**What you'll find there:**
+- ✅ **All endpoints** with detailed descriptions
+- ✅ **Request schemas** - what fields to send
+- ✅ **Response schemas** - what to expect in response
+- ✅ **Required/Optional** - which fields are mandatory
+- ✅ **Data types** - string, integer, boolean, array
+- ✅ **Examples** - example values for each field
+- ✅ **Validation rules** - constraints (min, max, enum)
+- ✅ **Error responses** - all possible errors
+- ✅ **Try it out!** - test endpoints directly from the browser
+- ✅ **Code examples** - ready-to-use snippets in bash, JavaScript, and PHP
 
 ---
 
@@ -30,9 +31,9 @@ const API_BASE_URL = 'http://localhost:8081/api';
 
 ---
 
-## 3️⃣ **Авторизація:**
+## 3️⃣ **Authentication:**
 
-### **Всі protected endpoints вимагають:**
+### **All protected endpoints require:**
 ```javascript
 headers: {
   'Authorization': `Bearer ${token}`,
@@ -41,7 +42,7 @@ headers: {
 }
 ```
 
-### **Public endpoints (без токена):**
+### **Public endpoints (no token required):**
 - `GET /health`
 - `POST /auth/register`
 - `POST /auth/login`
@@ -49,9 +50,9 @@ headers: {
 
 ---
 
-## 4️⃣ **Формат відповідей:**
+## 4️⃣ **Response Format:**
 
-### **Одиничний об'єкт:**
+### **Single Object:**
 ```json
 {
   "data": {
@@ -62,7 +63,7 @@ headers: {
 }
 ```
 
-### **Колекція (масив):**
+### **Collection (Array):**
 ```json
 {
   "data": [
@@ -72,7 +73,7 @@ headers: {
 }
 ```
 
-### **З повідомленням:**
+### **With Message:**
 ```json
 {
   "message": "Success message",
@@ -83,7 +84,7 @@ headers: {
 
 ---
 
-## 5️⃣ **Швидкі приклади:**
+## 5️⃣ **Quick Examples:**
 
 ### **Login:**
 ```javascript
@@ -98,8 +99,8 @@ const login = async (email, password) => {
   });
   
   const data = await response.json();
-  // data.token - зберегти в storage
-  // data.user - зберегти user info
+  // data.token - save to storage
+  // data.user - save user info
   return data;
 };
 ```
@@ -163,7 +164,7 @@ const logHabit = async (token, habitId, note = null) => {
 
 ---
 
-## 6️⃣ **Обробка помилок:**
+## 6️⃣ **Error Handling:**
 
 ```javascript
 const apiCall = async (url, options) => {
@@ -179,7 +180,7 @@ const apiCall = async (url, options) => {
     // Error handling
     switch (response.status) {
       case 401:
-        // Unauthenticated - редірект на login
+        // Unauthenticated - redirect to login
         await AsyncStorage.removeItem('token');
         navigation.navigate('Login');
         throw new Error('Please login again');
@@ -187,7 +188,7 @@ const apiCall = async (url, options) => {
       case 422:
         // Validation errors
         const errors = data.errors;
-        // Показати помилки біля полів
+        // Show errors near fields
         throw new Error(Object.values(errors).flat().join('\n'));
         
       case 404:
@@ -208,7 +209,7 @@ const apiCall = async (url, options) => {
 
 ---
 
-## 7️⃣ **TypeScript Types (опціонально):**
+## 7️⃣ **TypeScript Types (optional):**
 
 ```typescript
 interface User {
@@ -217,7 +218,7 @@ interface User {
   email: string;
   avatar: string | null;
   provider: 'email' | 'apple' | 'google';
-  locale: 'en' | 'uk' | 'ru';
+  locale: 'en' | 'uk';
   created_at: string;
 }
 
@@ -275,22 +276,22 @@ interface UserHero {
 
 ---
 
-## 8️⃣ **Де дивитися що відправляти:**
+## 8️⃣ **Where to see what to send:**
 
-### **Спосіб 1: Swagger UI (НАЙЛЕГШЕ!)**
+### **Method 1: Scribe Docs (EASIEST!)**
 
-1. Відкрити http://localhost:8081/api/documentation
-2. Знайти потрібний endpoint (наприклад, "POST /habits")
-3. Клікнути на нього - розгорнеться
-4. Секція **"Request body"** - показує ЩО відправляти:
+1. Open http://localhost:8081/docs
+2. Find the needed endpoint (e.g., "POST /habits")
+3. Click on it to expand
+4. **"Request body"** section - shows WHAT to send:
    ```
-   ✅ title*        string    "Ранкова зарядка"
+   ✅ title*        string    "Morning Run"
    ✅ frequency*    string    Enum: daily, weekly, monthly
-   ⚪ description   string    "Робити зарядку..."
-   ⚪ icon          string    "💪"
+   ⚪ description   string    "Running for 30 minutes"
+   ⚪ icon          string    "🏃"
    ```
-   * = required поле
-5. Секція **"Responses"** - показує ЩО прилетить:
+   * = required field
+5. **"Responses"** section - shows WHAT to expect:
    ```
    200 - Success
    {
@@ -302,13 +303,13 @@ interface UserHero {
    }
    ```
 
-### **Спосіб 2: Файл FRONTEND_INTEGRATION_GUIDE.md**
+### **Method 2: FRONTEND_INTEGRATION_GUIDE.md file**
 
-Там є готові приклади коду для кожного endpoint.
+Contains ready-to-use code examples for each endpoint.
 
 ---
 
-## 9️⃣ **Типовий flow застосунку:**
+## 9️⃣ **Typical App Flow:**
 
 ```javascript
 // 1. App Launch
@@ -346,38 +347,36 @@ const logHabit = async (habitId) => {
 
 ---
 
-## 🔟 **Поради:**
+## 🔟 **Tips:**
 
 ### **✅ DO:**
-- Завжди відправляти `Accept: application/json`
-- Зберігати token в secure storage
-- Обробляти всі коди помилок
-- Використовувати Swagger для перевірки схем
-- Тестувати в API Playground спочатку
+- Always send `Accept: application/json`
+- Store token in secure storage
+- Handle all error codes
+- Use Scribe docs to check schemas
+- Test in Scribe's "Try It Out" first
 
 ### **❌ DON'T:**
-- Не зберігати token в plain text
-- Не ігнорувати 401 errors
-- Не забувати про Content-Type headers
-- Не хардкодити URLs (використовувати constants)
+- Don't store token in plain text
+- Don't ignore 401 errors
+- Don't forget Content-Type headers
+- Don't hardcode URLs (use constants)
 
 ---
 
-## 📞 **Підтримка:**
+## 📞 **Support:**
 
-- **Swagger:** http://localhost:8081/api/documentation
-- **API Playground:** http://localhost:8081/playground  
+- **Docs:** http://localhost:8081/docs
+- **Playground:** http://localhost:8081/playground  
 - **Guide:** `/FRONTEND_INTEGRATION_GUIDE.md`
 
 ---
 
-## ✨ **Готово до інтеграції!**
+## ✨ **Ready for Integration!**
 
-**Все що потрібно:**
-1. Відкрити Swagger
-2. Подивитися схеми
-3. Писати код!
+**All you need:**
+1. Open Scribe Docs
+2. Check schemas
+3. Write code!
 
-Swagger показує **ВСЕ** - types, required fields, examples, validation! 🚀
-
-
+Scribe shows **EVERYTHING** - types, required fields, examples, validation! 🚀

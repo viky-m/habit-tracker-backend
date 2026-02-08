@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -16,12 +15,12 @@ return new class extends Migration
             $table->string('key')->unique(); // first_habit, week_streak, level_10, etc.
             $table->string('title');
             $table->text('description');
-            $table->string('icon')->nullable(); // Emoji або URL
+            $table->string('icon')->nullable(); // Emoji or URL
             $table->string('category'); // habits, streaks, levels, social
             $table->string('rarity')->default('common'); // common, rare, epic, legendary
-            $table->integer('xp_reward')->default(0); // Бонус XP за досягнення
-            $table->json('requirements')->nullable(); // Умови для розблокування
-            $table->boolean('is_secret')->default(false); // Прихані досягнення
+            $table->integer('xp_reward')->default(0); // XP bonus for achievement
+            $table->json('requirements')->nullable(); // Unlock requirements
+            $table->boolean('is_secret')->default(false); // Secret achievements
             $table->integer('sort_order')->default(0);
             $table->timestamps();
 
