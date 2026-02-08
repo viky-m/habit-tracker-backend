@@ -325,7 +325,18 @@ class UserService {
 }
 ```
 
-### Testing Requirements:
+#
+## Frontend Integration
+
+For the API to work correctly with a frontend application (CORS), you must configure the `FRONTEND_URL` in your `.env` file:
+
+```env
+FRONTEND_URL=http://localhost:5173
+```
+
+This URL should match the URL where your frontend application is running.
+
+## Testing Requirements:
 
 #### 1. **Обов'язкові тести для:**
 - ✅ Всі API endpoints (feature tests)

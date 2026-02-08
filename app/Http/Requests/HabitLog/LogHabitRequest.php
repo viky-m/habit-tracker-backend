@@ -19,4 +19,14 @@ class LogHabitRequest extends FormRequest
             'count' => ['nullable', 'integer', 'min:1'],
         ];
     }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $habit = $this->route('habit');
+            if ($habit && $habit->logs()->whereDate('completed_at', $this->input('completed_at', today()))->exists()) {
+                $validator->errors()->add('completed_at', 'Habit already logged for this date');
+            }
+        });
+    }
 }

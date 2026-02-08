@@ -62,7 +62,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('habits/{habit}')->group(function () {
         Route::post('/log', [HabitLogController::class, 'store']);
         Route::get('/logs', [HabitLogController::class, 'index']);
-        Route::get('/stats', [HabitLogController::class, 'stats']);
+        Route::get('/stats', [\App\Http\Controllers\Api\HabitController::class, 'getStats']);
     });
 
     // Heroes (public list)
