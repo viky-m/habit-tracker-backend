@@ -16,9 +16,44 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
-/data/db/*
-!/data/db/.gitkeep
+
+# Docker specific
+/data/db/mysql/*
+!/data/db/mysql/.gitkeep
+/data/db/postgres/*
+!/data/db/postgres/.gitkeep
 /etc/ssl/*
 !/etc/ssl/.gitkeep
-/etc/nginx/access.log
-/etc/nginx/error.log
+/etc/nginx/*.log
+docker-compose.override.yml
+
+# Storage
+/storage/logs/*
+!/storage/logs/.gitkeep
+/storage/framework/cache/*
+!/storage/framework/cache/.gitkeep
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
+/storage/framework/testing/*
+!/storage/framework/testing/.gitkeep
+/storage/framework/views/*
+!/storage/framework/views/.gitkeep
+/storage/app/*
+!/storage/app/.gitkeep
+!/storage/app/private
+/storage/app/private/*
+!/storage/app/private/.gitkeep
+!/storage/app/private/scribe
+/storage/app/private/scribe/*
+!/storage/app/private/scribe/.gitkeep
+/storage/debugbar/*
+
+# Coverage
+/coverage
+
+# Scribe documentation (generated files)
+.scribe/
+/public/vendor/scribe/
+/resources/views/scribe/
+/storage/app/private/scribe/openapi.yaml
+/storage/app/private/scribe/collection.json

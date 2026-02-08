@@ -1,225 +1,435 @@
-# Habit Tracker API
+# 🎯 Habit Tracker Backend API
 
-Backend API for mobile Habit Tracker application with gamification and 3D heroes.
+Гейміфікований трекер звичок з 3D героями - Backend API
 
-## Technologies
+---
 
-- **PHP 8.4** - programming language
-- **Laravel 12** - PHP framework
-- **MySQL (MariaDB 10.7)** - database
-- **Redis** - caching and queues
-- **Docker** - containerization
-- **Nginx** - web server
-- **Swagger/OpenAPI** - API documentation
+## 🚀 Швидкий старт
 
-## Features
-
-- ✅ RESTful API
-- ✅ Multi-language support (en, uk, de, fr, es)
-- ✅ JWT Authentication (Sanctum)
-- ✅ Swagger documentation
-- ✅ Redis for caching
-- ✅ Email via Mailhog (dev)
-- ✅ Xdebug for debugging
-
-## Quick Start
-
-### Requirements
-
-- Docker
-- Docker Compose
-- Make (optional)
-
-### Installation
-
-1. **Clone repository:**
-```bash
-git clone <repository-url>
-cd habit-tracker-backend
-```
-
-2. **Run automatic installation:**
-```bash
-make install
-```
-
-Or manually:
+### Запуск проекту:
 
 ```bash
-# Copy .env file
-cp .env.example .env
-
-# Build containers
-docker-compose build
-
-# Start containers
+# 1. Запустити Docker
 docker-compose up -d
 
-# Install dependencies
-docker exec -it habittracker_php composer install
+# 2. Встановити залежності (якщо перший раз)
+docker exec habittracker_php composer install
 
-# Generate key
-docker exec -it habittracker_php php artisan key:generate
+# 3. Налаштувати базу даних
+docker exec habittracker_php php artisan migrate
+docker exec habittracker_php php artisan db:seed --class=HeroSeeder
 
-# Run migrations
-docker exec -it habittracker_php php artisan migrate
+# 4. Згенерувати документацію
+docker exec habittracker_php php artisan scribe:generate
+
+# 5. Відкрити документацію
+# http://localhost:8081/docs
 ```
 
-3. **Check operation:**
-- API: http://localhost:8081
-- Mailhog: http://localhost:8026
-- API Docs: http://localhost:8081/api/documentation
+---
 
-## Makefile Commands
+## 📚 Документація API
 
+- **🎨 Scribe Documentation:** http://localhost:8081/docs ← **ГОЛОВНЕ!**
+- **🧪 API Playground:** http://localhost:8081/playground
+- **❤️ Health Check:** http://localhost:8081/api/health
+
+---
+
+## 🎮 Реалізований функціонал
+
+### Авторизація:
+- ✅ Email/Password реєстрація та login
+- ✅ Apple Sign-In
+- ✅ Google Sign-In
+- ✅ Account Linking (прив'язка провайдерів до одного email)
+- ✅ Laravel Sanctum токени
+- ✅ Автоматичний onboarding з першим героєм
+
+### Звички (Habits):
+- ✅ CRUD операції (Create, Read, Update, Delete)
+- ✅ Категорізація за частотою (daily, weekly, monthly, custom)
+- ✅ Кастомні дні для виконання
+- ✅ Target counts
+- ✅ Іконки та кольори
+- ✅ Soft deletes
+
+### Логування виконань:
+- ✅ Логування виконання звички
+- ✅ Нотатки до виконання
+- ✅ Кількість виконань
+- ✅ Історія всіх виконань
+- ✅ Статистика по звичці (completion rate, streaks)
+
+### Гейміфікація:
+- ✅ **XP система** - нарахування за виконання звичок
+- ✅ **Streak система** - серії послідовних днів
+- ✅ **Level up** - автоматичне підвищення рівня героя
+- ✅ **4 starter heroes** (Warrior, Sage, Guardian, Phoenix)
+- ✅ **Hero progression** - досвід, рівень, статистика
+- ✅ **Onboarding** - автоматичне створення першого героя
+- ✅ **User statistics** - загальна статистика прогресу
+- ✅ **Reminders** - нагадування про звички (P0!)
+- ✅ **Achievements** - система досягнень (13 achievements!)
+
+### Мультимовність:
+- ✅ English (en)
+- ✅ Українська (uk)
+
+---
+
+## 📊 API Endpoints (32)
+
+### Authentication (5):
+```
+POST /api/auth/register         - Реєстрація
+POST /api/auth/login            - Вхід
+POST /api/auth/social-login     - Apple/Google вхід
+POST /api/auth/logout           - Вихід
+GET  /api/auth/me               - Поточний користувач
+```
+
+### Habits (5):
+```
+GET    /api/habits              - Список звичок
+POST   /api/habits              - Створити звичку
+GET    /api/habits/{id}         - Деталі звички
+PUT    /api/habits/{id}         - Оновити звичку
+DELETE /api/habits/{id}         - Видалити звичку
+```
+
+### Habit Logs (3):
+```
+POST /api/habits/{id}/log       - Залогувати виконання (+ XP & Streak!)
+GET  /api/habits/{id}/logs      - Історія виконань
+GET  /api/habits/{id}/stats     - Статистика звички
+```
+
+### User Statistics (1):
+```
+GET /api/user/stats             - Загальна статистика користувача
+```
+
+### Reminders (4):
+```
+GET    /api/reminders           - Список нагадувань
+POST   /api/reminders           - Створити нагадування
+PUT    /api/reminders/{id}      - Оновити нагадування
+DELETE /api/reminders/{id}      - Видалити нагадування
+```
+
+### Achievements (3):
+```
+GET  /api/achievements          - Всі досягнення
+GET  /api/achievements/user     - Розблоковані досягнення
+POST /api/achievements/check    - Перевірити нові
+```
+
+### Heroes (2):
+```
+GET /api/heroes                 - Список доступних героїв
+GET /api/heroes/{id}            - Деталі героя
+```
+
+### User Heroes (4):
+```
+GET  /api/user/heroes           - Мої герої
+GET  /api/user/heroes/active    - Активний герой
+POST /api/user/heroes/{id}/unlock   - Розблокувати героя
+POST /api/user/heroes/{id}/activate - Активувати героя
+```
+
+### System (1):
+```
+GET /api/health                 - Health check
+```
+
+---
+
+## 🛠️ Команди для розробки
+
+### Docker:
 ```bash
-make help          # Show all commands
-make up            # Start containers
-make down          # Stop containers
-make restart       # Restart containers
-make shell         # Enter PHP container
-make logs          # Show logs
-make composer      # Run composer install
-make migrate       # Run migrations
-make seed          # Run seeders
-make fresh         # Fresh migration with seeds
-make test          # Run tests
-make pint          # Code formatting
-make stan          # Static analysis
+# Запустити всі контейнери
+docker-compose up -d
+
+# Зупинити
+docker-compose down
+
+# Перебудувати після змін в Dockerfile
+docker-compose up -d --build
+
+# Логи
+docker-compose logs -f php
 ```
 
-## API Endpoints
-
-### Authentication
-- `POST /api/register` - Registration
-- `POST /api/login` - Login
-- `POST /api/logout` - Logout
-- `GET /api/user` - Current user
-
-### Habits
-- `GET /api/habits` - List habits
-- `POST /api/habits` - Create habit
-- `GET /api/habits/{id}` - Habit details
-- `PUT /api/habits/{id}` - Update habit
-- `DELETE /api/habits/{id}` - Delete habit
-- `POST /api/habits/{id}/complete` - Mark completion
-
-### Statistics
-- `GET /api/stats/daily` - Daily statistics
-- `GET /api/stats/weekly` - Weekly statistics
-- `GET /api/stats/monthly` - Monthly statistics
-
-### Hero
-- `GET /api/hero` - Hero information
-- `GET /api/hero/stats` - Hero characteristics
-
-## Multi-language Support
-
-API supports multi-language through `Accept-Language` header:
-
+### Laravel:
 ```bash
-curl -H "Accept-Language: uk" http://localhost:8081/api/habits
+# Міграції
+docker exec habittracker_php php artisan migrate
+docker exec habittracker_php php artisan migrate:fresh --seed
+
+# Seed heroes
+docker exec habittracker_php php artisan db:seed --class=HeroSeeder
+
+# Cache clear
+docker exec habittracker_php php artisan cache:clear
+docker exec habittracker_php php artisan config:clear
+
+# Routes
+docker exec habittracker_php php artisan route:list
 ```
 
-Supported languages:
-- `en` - English (default)
-- `uk` - Ukrainian
-- `de` - German
-- `fr` - French
-- `es` - Spanish
-
-## Development
-
-### Project Structure
-
-```
-.
-├── app/
-│   ├── Http/
-│   │   ├── Controllers/Api/  # API controllers
-│   │   ├── Requests/         # Form Requests
-│   │   ├── Resources/        # API Resources
-│   │   └── Middleware/       # Middleware (SetLocale)
-│   ├── Models/               # Eloquent models
-│   ├── Services/             # Business logic
-│   └── Repositories/         # Repositories
-├── database/
-│   ├── migrations/           # Database migrations
-│   ├── seeders/              # Seeders
-│   └── factories/            # Test factories
-├── lang/                     # Localization
-│   ├── en/
-│   ├── uk/
-│   └── ...
-├── routes/
-│   └── api.php              # API routes
-├── tests/                   # Tests
-└── docker-compose.yaml      # Docker configuration
-```
-
-### Container Access
-
-**PHP container:**
+### Тестування:
 ```bash
-docker exec -it habittracker_php bash
+# Всі тести (90 passed!)
+docker exec habittracker_php php artisan test
+
+# Конкретна група
+docker exec habittracker_php php artisan test --filter=AuthTest
+docker exec habittracker_php php artisan test --filter=GamificationTest
+docker exec habittracker_php php artisan test --filter=AchievementTest
+docker exec habittracker_php php artisan test --filter=ReminderTest
+
+# З coverage
+docker exec habittracker_php php artisan test --coverage
+
+# З детальним виводом
+docker exec habittracker_php php artisan test --verbose
 ```
 
-**MySQL:**
+### Code Quality:
 ```bash
+# Laravel Pint (formatter)
+docker exec habittracker_php vendor/bin/pint
+
+# Перевірка без змін
+docker exec habittracker_php vendor/bin/pint --test
+
+# Larastan (static analysis)
+docker exec habittracker_php vendor/bin/phpstan analyse
+```
+
+### Документація:
+```bash
+# Згенерувати Scribe документацію
+docker exec habittracker_php php artisan scribe:generate
+
+# Очистити кеш Scribe
+docker exec habittracker_php php artisan scribe:clear
+```
+
+### Database:
+```bash
+# Відкрити MySQL shell
 docker exec -it habittracker_mysql mysql -u habittracker -phabittracker habittracker
+
+# Backup database
+docker exec habittracker_mysql mysqldump -u habittracker -phabittracker habittracker > backup.sql
+
+# Restore database
+docker exec -i habittracker_mysql mysql -u habittracker -phabittracker habittracker < backup.sql
 ```
 
-**Redis:**
+### PHP Container:
 ```bash
-docker exec -it habittracker_redis redis-cli
+# Зайти в PHP контейнер
+docker exec -it habittracker_php bash
+
+# Composer
+docker exec habittracker_php composer install
+docker exec habittracker_php composer update
 ```
 
-### Testing
+---
 
+## 📋 Правила розробки
+
+### Code Quality Standards:
+
+#### 1. **SOLID Principles** (обов'язково!)
+- **S**ingle Responsibility - один клас = одна відповідальність
+- **O**pen/Closed - відкрито для розширення, закрито для модифікації
+- **L**iskov Substitution - можливість заміни реалізацій
+- **I**nterface Segregation - специфічні інтерфейси
+- **D**ependency Inversion - залежність від абстракцій
+
+#### 2. **Використовуйте Interfaces:**
+```php
+// ✅ Good
+public function __construct(
+    private GamificationServiceContract $gamification
+) {}
+
+// ❌ Bad
+public function __construct(
+    private GamificationService $gamification
+) {}
+```
+
+#### 3. **Service Layer для бізнес-логіки:**
+```php
+// ✅ Good - Thin Controller
+class HabitController {
+    public function store(HabitService $service) {
+        return $service->createHabit($request->validated());
+    }
+}
+
+// ❌ Bad - Fat Controller
+class HabitController {
+    public function store() {
+        // 50 lines of business logic here
+    }
+}
+```
+
+#### 4. **Type Hints скрізь:**
+```php
+// ✅ Good
+public function calculate(Habit $habit): int
+
+// ❌ Bad
+public function calculate($habit)
+```
+
+#### 5. **No Magic Numbers:**
+```php
+// ✅ Good
+private const BASE_XP = 10;
+$xp = self::BASE_XP;
+
+// ❌ Bad
+$xp = 10;
+```
+
+#### 6. **Small Methods (< 20 lines):**
+```php
+// ✅ Good
+public function processPayment() {
+    $this->validate();
+    $this->charge();
+    $this->sendReceipt();
+}
+
+// ❌ Bad - 50+ lines method
+```
+
+#### 7. **Dependency Injection через Constructor:**
+```php
+// ✅ Good - Constructor Injection
+class UserService {
+    public function __construct(
+        private UserRepository $repository
+    ) {}
+}
+```
+
+### Testing Requirements:
+
+#### 1. **Обов'язкові тести для:**
+- ✅ Всі API endpoints (feature tests)
+- ✅ Бізнес-логіка в сервісах (unit tests)
+- ✅ Validation rules (feature tests)
+- ✅ Authorization policies (feature tests)
+
+#### 2. **Coverage мінімум 70%:**
 ```bash
-# Run all tests
-make test
-
-# Or via PHPUnit
-docker exec -it habittracker_php php artisan test
-
-# Run specific test
-docker exec -it habittracker_php php artisan test --filter=HabitTest
+php artisan test --coverage --min=70
 ```
 
-### Code Quality
+#### 3. **Naming Convention:**
+```php
+// Feature tests
+test_user_can_register_with_valid_data()
+test_registration_fails_with_invalid_email()
 
+// Unit tests  
+test_xp_calculator_returns_correct_base_xp()
+test_level_up_increases_hero_level()
+```
+
+#### 4. **Use Pest Assertions:**
+```php
+// ✅ Good
+$response->assertSuccessful();
+$response->assertCreated();
+$response->assertUnauthorized();
+
+// ❌ Bad
+$response->assertStatus(200);
+$response->assertStatus(401);
+```
+
+### Code Style:
+
+#### 1. **Laravel Pint перед кожним commit:**
 ```bash
-# Code formatting (Laravel Pint)
-make pint
-
-# Static analysis (Larastan)
-make stan
+vendor/bin/pint
 ```
 
-## Troubleshooting
-
-### Ports in use
-If ports 8081, 3307 are busy, change them in `.env`:
-```
-HTTP_PORT=8082
-MYSQL_PORT=3308
-```
-
-### Permissions
-If you have permission issues:
-```bash
-docker exec -it habittracker_php chmod -R 775 storage bootstrap/cache
-docker exec -it habittracker_php chown -R xdocker:xdocker storage bootstrap/cache
+#### 2. **PHPDoc для публічних методів:**
+```php
+/**
+ * Calculate XP for completing a habit
+ *
+ * @param Habit $habit Habit that was completed
+ * @return int XP amount awarded
+ */
+public function calculate(Habit $habit): int
 ```
 
-### Clean everything
-```bash
-docker-compose down -v
-rm -rf data/db/mysql/*
-make install
+#### 3. **Use strict types:**
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services;
 ```
 
-## License
+---
 
-MIT
+## 🗄️ Tech Stack
+
+- **PHP:** 8.4
+- **Laravel:** 12.x
+- **MySQL:** 8.0
+- **Redis:** 7.0
+- **Nginx:** Latest
+- **Docker:** 20.10+
+- **Composer:** 2.x
+
+### Packages:
+- `laravel/sanctum` - API authentication
+- `knuckleswtf/scribe` - API documentation
+- `pestphp/pest` - Testing framework
+- `larastan/larastan` - Static analysis
+- `laravel/pint` - Code formatter
+
+---
+
+## 🎯 Для Frontend розробника
+
+### Документація:
+1. **Scribe Docs:** http://localhost:8081/docs
+2. **Integration Guide:** `FRONTEND_INTEGRATION_GUIDE.md`
+3. **Quick Start:** `FOR_FRONTEND_DEVELOPER.md`
+
+### Важливо:
+- Більшість endpoints вимагають `Authorization: Bearer {token}`
+- Токен отримується при `/auth/login` або `/auth/register`
+- Всі responses в JSON форматі
+- Використовуйте `Accept: application/json` header
+
+---
+
+## 📞 Підтримка
+
+- **Документація:** Дивіться `.md` файли в корені проекту
+- **API Docs:** http://localhost:8081/docs
+- **Issues:** GitHub Issues
+
+---
+
+**🎊 Backend ready for production!** 🚀
