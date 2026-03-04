@@ -139,7 +139,7 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:8081/api';
+        const API_URL = "{{ config('app.url') }}/api";
         let token = '';
 
         // Auto-load token from localStorage
@@ -192,7 +192,7 @@
             try {
                 const response = await axios.post(`${API_URL}/auth/login`, {
                     email: 'test@example.com',
-                    password: 'password123'
+                    password: 'password'
                 });
 
                 token = response.data.token;
@@ -210,7 +210,7 @@
             try {
                 const response = await axios.post(`${API_URL}/auth/login`, {
                     email: 'test@example.com',
-                    password: 'password123'
+                    password: 'password'
                 });
                 showResponse('POST', '/auth/login', response.status, response.data);
             } catch (error) {
