@@ -10,7 +10,7 @@ test('level up service increases level when enough XP', function () {
         'experience' => 150, // More than needed for level 2 (100)
     ]);
 
-    $xpCalculator = new XpCalculator();
+    $xpCalculator = new XpCalculator;
     $service = new LevelUpService($xpCalculator);
 
     $leveledUp = $service->processLevelUp($hero);
@@ -25,7 +25,7 @@ test('level up service does not increase level when not enough XP', function () 
         'experience' => 50, // Not enough for level 2 (needs 100)
     ]);
 
-    $xpCalculator = new XpCalculator();
+    $xpCalculator = new XpCalculator;
     $service = new LevelUpService($xpCalculator);
 
     $leveledUp = $service->processLevelUp($hero);
@@ -40,7 +40,7 @@ test('level up service can level up multiple times', function () {
         'experience' => 1000, // Enough for multiple levels
     ]);
 
-    $xpCalculator = new XpCalculator();
+    $xpCalculator = new XpCalculator;
     $service = new LevelUpService($xpCalculator);
 
     $leveledUp = $service->processLevelUp($hero);
@@ -50,7 +50,7 @@ test('level up service can level up multiple times', function () {
 });
 
 test('level up service stops at correct level', function () {
-    $xpCalculator = new XpCalculator();
+    $xpCalculator = new XpCalculator;
 
     // XP for level 3 is 360
     $hero = UserHero::factory()->make([
@@ -63,4 +63,3 @@ test('level up service stops at correct level', function () {
 
     expect($hero->level)->toBe(2); // Should stop at 2, not reach 3
 });
-

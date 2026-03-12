@@ -31,4 +31,3 @@ interface AchievementServiceContract
      */
     public function getAllAchievements(): Collection;
 }
-

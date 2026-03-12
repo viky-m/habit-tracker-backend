@@ -6,9 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Habit\StoreHabitRequest;
 use App\Http\Requests\Habit\UpdateHabitRequest;
 use App\Http\Resources\HabitResource;
+use App\Http\Resources\HabitStatsResource;
+use App\Http\Resources\MessageResource;
 use App\Models\Habit;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Http\JsonResponse;
+use App\Services\Contracts\HabitServiceContract;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,7 +20,12 @@ use Illuminate\Support\Facades\Auth;
  */
 class HabitController extends Controller
 {
-    use AuthorizesRequests;
+    /**
+     * HabitController constructor.
+     */
+    public function __construct(
+        protected HabitServiceContract $habitService
+    ) {}
 
     /**
      * Get all user's habits
@@ -42,13 +48,8 @@ class HabitController extends Controller
      */
     public function index(): AnonymousResourceCollection
     {
-        $query = Auth::user()->habits();
-
-        if (request()->has('is_active')) {
-            $query->where('is_active', request()->boolean('is_active'));
-        }
-
-        $habits = $query->orderBy('created_at', 'desc')->get();
+        $filters = request()->only(['is_active']);
+        $habits = $this->habitService->getHabitsForUser(Auth::user(), $filters);
 
         return HabitResource::collection($habits);
     }
@@ -76,7 +77,7 @@ class HabitController extends Controller
      */
     public function store(StoreHabitRequest $request): HabitResource
     {
-        $habit = Auth::user()->habits()->create($request->validated());
+        $habit = $this->habitService->createHabit(Auth::user(), $request->validated());
 
         return new HabitResource($habit);
     }
@@ -98,8 +99,6 @@ class HabitController extends Controller
      */
     public function show(Habit $habit): HabitResource
     {
-        $this->authorize('view', $habit);
-
         return new HabitResource($habit);
     }
 
@@ -119,9 +118,7 @@ class HabitController extends Controller
      */
     public function update(UpdateHabitRequest $request, Habit $habit): HabitResource
     {
-        $this->authorize('update', $habit);
-
-        $habit->update($request->validated());
+        $this->habitService->updateHabit($habit, $request->validated());
 
         return new HabitResource($habit);
     }
@@ -137,13 +134,11 @@ class HabitController extends Controller
      *   "message": "Habit deleted successfully"
      * }
      */
-    public function destroy(Habit $habit): JsonResponse
+    public function destroy(Habit $habit): MessageResource
     {
-        $this->authorize('delete', $habit);
+        $this->habitService->deleteHabit($habit);
 
-        $habit->delete();
-
-        return response()->json(['message' => 'Habit deleted successfully']);
+        return new MessageResource('Habit deleted successfully');
     }
 
     /**
@@ -162,23 +157,10 @@ class HabitController extends Controller
      *   "is_completed_today": true
      * }
      */
-    public function getStats(Habit $habit): JsonResponse
+    public function getStats(Habit $habit): HabitStatsResource
     {
-        $this->authorize('view', $habit);
+        $stats = $this->habitService->getHabitStats($habit);
 
-        // Recalculate streak if needed or trust the model fields
-        // For accuracy, we can rely on model fields which are updated on log creation
-        // But the requirement says "implement a getStats method ... that calculates 'current streaks'".
-        // Given we have 'streak' column in DB, we should return it, but maybe verify it.
-        // Let's stick to returning the stored values + calculation for rate.
-
-        return response()->json([
-            'total_completions' => $habit->total_completions,
-            'current_streak' => $habit->streak,
-            'best_streak' => $habit->best_streak,
-            'completion_rate_30_days' => round($habit->getCompletionRate(30), 1),
-            'last_completed_at' => $habit->last_completed_at,
-            'is_completed_today' => $habit->isCompletedToday(),
-        ]);
+        return new HabitStatsResource($stats);
     }
 }

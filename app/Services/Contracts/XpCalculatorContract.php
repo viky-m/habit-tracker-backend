@@ -20,4 +20,3 @@ interface XpCalculatorContract
      */
     public function getXpForLevel(int $level): int;
 }
-

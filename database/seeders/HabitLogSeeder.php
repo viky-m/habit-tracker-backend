@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use App\Models\Habit;
 use Illuminate\Database\Seeder;
 
 class HabitLogSeeder extends Seeder
@@ -11,8 +10,9 @@ class HabitLogSeeder extends Seeder
     public function run(): void
     {
         $user = User::where('email', 'test@example.com')->first();
-        if (!$user)
+        if (! $user) {
             return;
+        }
 
         $habits = $user->habits;
 

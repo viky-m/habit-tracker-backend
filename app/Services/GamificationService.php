@@ -6,6 +6,8 @@ use App\Models\Habit;
 use App\Models\Hero;
 use App\Models\User;
 use App\Models\UserHero;
+use App\Repositories\Contracts\HeroRepositoryContract;
+use App\Repositories\Contracts\UserHeroRepositoryContract;
 use App\Services\Contracts\GamificationServiceContract;
 use App\Services\Contracts\LevelUpServiceContract;
 use App\Services\Contracts\XpCalculatorContract;
@@ -24,16 +26,17 @@ class GamificationService implements GamificationServiceContract
 {
     public function __construct(
         private XpCalculatorContract $xpCalculator,
-        private LevelUpServiceContract $levelUpService
-    ) {
-    }
+        private LevelUpServiceContract $levelUpService,
+        protected HeroRepositoryContract $heroRepository,
+        protected UserHeroRepositoryContract $userHeroRepository
+    ) {}
 
     /**
      * Award XP to user's active hero when habit is completed
      */
     public function awardXpForHabit(User $user, Habit $habit): array
     {
-        $activeHero = $user->activeHero;
+        $activeHero = $this->userHeroRepository->getActiveHero($user);
 
         if (! $activeHero) {
             Log::warning('User has no active hero', ['user_id' => $user->id]);
@@ -50,7 +53,10 @@ class GamificationService implements GamificationServiceContract
         // Check for level up using LevelUpService
         $leveledUp = $this->levelUpService->processLevelUp($activeHero);
 
-        $activeHero->save();
+        $this->userHeroRepository->update($activeHero, [
+            'experience' => $activeHero->experience,
+            'level' => $activeHero->level,
+        ]);
 
         return $this->buildXpResponse($xp, $activeHero, $leveledUp);
     }
@@ -154,10 +160,7 @@ class GamificationService implements GamificationServiceContract
      */
     private function findOrCreateStarterHero(): Hero
     {
-        $starterHero = Hero::where('unlock_level', 0)
-            ->orWhere('unlock_level', 1)
-            ->orderBy('unlock_level')
-            ->first();
+        $starterHero = $this->heroRepository->findStarterHero();
 
         if ($starterHero) {
             return $starterHero;
@@ -171,7 +174,7 @@ class GamificationService implements GamificationServiceContract
      */
     private function createDefaultStarterHero(): Hero
     {
-        return Hero::create([
+        return $this->heroRepository->create([
             'name' => 'Warrior',
             'description' => 'A brave warrior starting their journey',
             'model_url' => '/models/warrior.glb',
@@ -193,7 +196,7 @@ class GamificationService implements GamificationServiceContract
      */
     private function createUserHeroInstance(User $user, Hero $hero): UserHero
     {
-        return UserHero::create([
+        return $this->userHeroRepository->create([
             'user_id' => $user->id,
             'hero_id' => $hero->id,
             'level' => 1,
@@ -204,4 +207,3 @@ class GamificationService implements GamificationServiceContract
         ]);
     }
 }
-

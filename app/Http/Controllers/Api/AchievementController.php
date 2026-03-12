@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AchievementCheckResource;
+use App\Http\Resources\AchievementResource;
 use App\Services\Contracts\AchievementServiceContract;
-use Illuminate\Http\JsonResponse;
 
 /**
  * @group Achievements
@@ -37,11 +38,11 @@ class AchievementController extends Controller
      *   ]
      * }
      */
-    public function index(): JsonResponse
+    public function index()
     {
         $achievements = $this->achievementService->getAllAchievements();
 
-        return response()->json(['data' => $achievements]);
+        return AchievementResource::collection($achievements);
     }
 
     /**
@@ -60,11 +61,11 @@ class AchievementController extends Controller
      *   ]
      * }
      */
-    public function userAchievements(): JsonResponse
+    public function userAchievements()
     {
         $achievements = $this->achievementService->getUserAchievements(auth()->user());
 
-        return response()->json(['data' => $achievements]);
+        return AchievementResource::collection($achievements);
     }
 
     /**
@@ -86,11 +87,11 @@ class AchievementController extends Controller
      *   "count": 1
      * }
      */
-    public function checkNew(): JsonResponse
+    public function checkNew(): AchievementCheckResource
     {
         $newAchievements = $this->achievementService->checkAchievements(auth()->user());
 
-        return response()->json([
+        return new AchievementCheckResource([
             'newly_unlocked' => $newAchievements,
             'count' => $newAchievements->count(),
         ]);

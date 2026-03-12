@@ -17,19 +17,20 @@ abstract class TestCase extends BaseTestCase
         // Only run this logic if we are testing with MySQL
         // We manually load .env.test if it exists to get the DB credentials
         // because the App is not booted yet.
-        $envFile = __DIR__ . '/../.env.test';
+        $envFile = __DIR__.'/../.env.test';
         $dbConfig = [];
 
         if (file_exists($envFile)) {
-            // We use Dotenv to parse the file but not populate the environment globally 
+            // We use Dotenv to parse the file but not populate the environment globally
             // to avoid side effects, although populate is probably fine here.
             // Actually, simply parsing it is safer.
             $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             foreach ($lines as $line) {
-                if (str_starts_with(trim($line), '#'))
+                if (str_starts_with(trim($line), '#')) {
                     continue;
+                }
                 if (str_contains($line, '=')) {
-                    list($k, $v) = explode('=', $line, 2);
+                    [$k, $v] = explode('=', $line, 2);
                     $dbConfig[trim($k)] = trim(trim($v), '"\'');
                 }
             }

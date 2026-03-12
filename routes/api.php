@@ -1,11 +1,14 @@
 <?php
 
+use App\Http\Controllers\Api\AchievementController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\HabitController;
 use App\Http\Controllers\Api\HabitLogController;
+use App\Http\Controllers\Api\HabitReminderController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\HeroController;
 use App\Http\Controllers\Api\UserHeroController;
+use App\Http\Controllers\Api\UserStatsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -38,31 +41,45 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // User Statistics
-    Route::get('/user/stats', [\App\Http\Controllers\Api\UserStatsController::class, 'index']);
+    Route::get('/user/stats', [UserStatsController::class, 'index']);
 
     // Reminders
     Route::prefix('reminders')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\HabitReminderController::class, 'index']);
-        Route::post('/', [\App\Http\Controllers\Api\HabitReminderController::class, 'store']);
-        Route::put('/{reminder}', [\App\Http\Controllers\Api\HabitReminderController::class, 'update']);
-        Route::delete('/{reminder}', [\App\Http\Controllers\Api\HabitReminderController::class, 'destroy']);
+        Route::get('/', [HabitReminderController::class, 'index']);
+        Route::post('/', [HabitReminderController::class, 'store']);
+        Route::put('/{reminder}', [HabitReminderController::class, 'update'])
+            ->middleware('can:update,reminder');
+        Route::delete('/{reminder}', [HabitReminderController::class, 'destroy'])
+            ->middleware('can:delete,reminder');
     });
 
     // Achievements
     Route::prefix('achievements')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\AchievementController::class, 'index']);
-        Route::get('/user', [\App\Http\Controllers\Api\AchievementController::class, 'userAchievements']);
-        Route::post('/check', [\App\Http\Controllers\Api\AchievementController::class, 'checkNew']);
+        Route::get('/', [AchievementController::class, 'index']);
+        Route::get('/user', [AchievementController::class, 'userAchievements']);
+        Route::post('/check', [AchievementController::class, 'checkNew']);
     });
 
     // Habits CRUD
-    Route::apiResource('habits', HabitController::class);
+    Route::prefix('habits')->group(function () {
+        Route::get('/', [HabitController::class, 'index']);
+        Route::post('/', [HabitController::class, 'store']);
+        Route::get('/{habit}', [HabitController::class, 'show'])
+            ->middleware('can:view,habit');
+        Route::put('/{habit}', [HabitController::class, 'update'])
+            ->middleware('can:update,habit');
+        Route::delete('/{habit}', [HabitController::class, 'destroy'])
+            ->middleware('can:delete,habit');
+    });
 
     // Habit Logs
     Route::prefix('habits/{habit}')->group(function () {
-        Route::post('/log', [HabitLogController::class, 'store']);
-        Route::get('/logs', [HabitLogController::class, 'index']);
-        Route::get('/stats', [\App\Http\Controllers\Api\HabitController::class, 'getStats']);
+        Route::post('/log', [HabitLogController::class, 'store'])
+            ->middleware('can:view,habit');
+        Route::get('/logs', [HabitLogController::class, 'index'])
+            ->middleware('can:view,habit');
+        Route::get('/stats', [HabitController::class, 'getStats'])
+            ->middleware('can:view,habit');
     });
 
     // Heroes (public list)
@@ -74,6 +91,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [UserHeroController::class, 'index']);
         Route::get('/active', [UserHeroController::class, 'active']);
         Route::post('/{hero}/unlock', [UserHeroController::class, 'unlock']);
-        Route::post('/{userHero}/activate', [UserHeroController::class, 'activate']);
+        Route::post('/{userHero}/activate', [UserHeroController::class, 'activate'])
+            ->middleware('can:update,userHero');
     });
 });

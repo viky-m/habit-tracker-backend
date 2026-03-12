@@ -4,131 +4,129 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\HabitLog\LogHabitRequest;
+use App\Http\Resources\HabitLogCompletionResource;
 use App\Http\Resources\HabitLogResource;
+use App\Http\Resources\HabitStatsResource;
 use App\Models\Habit;
-use App\Services\Contracts\AchievementServiceContract;
-use App\Services\Contracts\GamificationServiceContract;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Services\Contracts\HabitLogServiceContract;
+use App\Services\Contracts\HabitServiceContract;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Auth;
 
+/**
+ * @group Habit Logs
+ *
+ * APIs for logging habit completions and tracking progress.
+ */
 class HabitLogController extends Controller
 {
-    use AuthorizesRequests;
     /**
-     * @OA\Post(
-     *     path="/habits/{habit}/log",
-     *     tags={"Habit Logs"},
-     *     summary="Log habit completion",
-     *     description="Mark habit as completed",
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(name="habit", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\RequestBody(
-     *         @OA\JsonContent(
-     *             @OA\Property(property="completed_at", type="string", format="date", example="2025-10-29"),
-     *             @OA\Property(property="note", type="string", example="Felt great!"),
-     *             @OA\Property(property="count", type="integer", example=1)
-     *         )
-     *     ),
-     *     @OA\Response(response=201, description="Habit completion logged")
-     * )
+     * HabitLogController constructor.
+     */
+    public function __construct(
+        protected HabitLogServiceContract $habitLogService,
+        protected HabitServiceContract $habitService
+    ) {}
+
+    /**
+     * Log habit completion
+     *
+     * Mark habit as completed and update gamification stats.
+     *
+     * @authenticated
+     *
+     * @urlParam habit integer required The ID of the habit. Example: 1
+     *
+     * @bodyParam completed_at date User completion date. Example: 2025-10-29
+     * @bodyParam note string Note about completion. Example: Feeling energized!
+     * @bodyParam count integer Number of completions (for counter-based habits). Example: 1
+     *
+     * @response 201 {
+     *   "data": {
+     *     "id": 1,
+     *     "habit_id": 1,
+     *     "completed_at": "2025-10-29",
+     *     "note": "Feeling energized!",
+     *     "count": 1,
+     *     "created_at": "2025-10-29T10:00:00.000000Z"
+     *   },
+     *   "gamification": {
+     *     "xp": {"gained": 10, "total": 150, "level_up": false},
+     *     "streak": {"current": 5, "best": 10}
+     *   },
+     *   "achievements": {
+     *     "newly_unlocked": [],
+     *     "count": 0
+     *   }
+     * }
      */
     public function store(
         LogHabitRequest $request,
-        Habit $habit,
-        GamificationServiceContract $gamification,
-        AchievementServiceContract $achievements
+        Habit $habit
     ): JsonResponse {
-        $this->authorize('view', $habit);
-
-        $log = $habit->logs()->updateOrCreate(
-            [
-                'habit_id' => $habit->id,
-                'user_id' => auth()->id(),
-                'completed_at' => $request->input('completed_at', today()),
-            ],
-            [
-                'note' => $request->input('note'),
-                'count' => $request->input('count', 1),
-            ]
+        $result = $this->habitLogService->logCompletion(
+            Auth::user(),
+            $habit,
+            $request->validated()
         );
 
-        // 🔥 GAMIFICATION: Update streak BEFORE updating last_completed_at
-        $streakInfo = $gamification->updateStreak($habit);
-
-        // Update habit stats
-        $habit->increment('total_completions');
-        $habit->last_completed_at = now();
-        $habit->save();
-
-        // 🔥 GAMIFICATION: Award XP to active hero
-        $xpInfo = $gamification->awardXpForHabit(auth()->user(), $habit);
-
-        // 🏆 ACHIEVEMENTS: Check for new achievements
-        $newAchievements = $achievements->checkAchievements(auth()->user());
-
-        return response()->json([
-            'data' => new HabitLogResource($log),
-            'gamification' => [
-                'xp' => $xpInfo,
-                'streak' => $streakInfo,
-            ],
-            'achievements' => [
-                'newly_unlocked' => $newAchievements->map(fn($a) => [
-                    'id' => $a->id,
-                    'title' => $a->title,
-                    'icon' => $a->icon,
-                    'xp_reward' => $a->xp_reward,
-                ]),
-                'count' => $newAchievements->count(),
-            ],
-        ], 201);
+        return (new HabitLogCompletionResource($result))
+            ->response()
+            ->setStatusCode(201);
     }
 
     /**
-     * @OA\Get(
-     *     path="/habits/{habit}/logs",
-     *     tags={"Habit Logs"},
-     *     summary="Get habit logs",
-     *     description="History of habit executions",
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(name="habit", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="List of logs")
-     * )
+     * Get habit logs
+     *
+     * Returns a history of habit executions.
+     *
+     * @authenticated
+     *
+     * @urlParam habit integer required The ID of the habit. Example: 1
+     *
+     * @response 200 {
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "habit_id": 1,
+     *       "completed_at": "2025-10-29",
+     *       "note": "Feeling energized!",
+     *       "count": 1,
+     *       "created_at": "2025-10-29T10:00:00.000000Z"
+     *     }
+     *   ]
+     * }
      */
     public function index(Habit $habit): AnonymousResourceCollection
     {
-        $this->authorize('view', $habit);
-
-        $logs = $habit->logs()->orderBy('completed_at', 'desc')->get();
+        $logs = $this->habitLogService->getLogsForHabit($habit);
 
         return HabitLogResource::collection($logs);
     }
 
     /**
-     * @OA\Get(
-     *     path="/habits/{habit}/stats",
-     *     tags={"Habit Logs"},
-     *     summary="Get habit statistics",
-     *     description="Habit execution statistics",
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(name="habit", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="Statistics")
-     * )
+     * Get habit statistics
+     *
+     * Returns execution statistics for a specific habit.
+     *
+     * @authenticated
+     *
+     * @urlParam habit integer required The ID of the habit. Example: 1
+     *
+     * @response 200 {
+     *   "total_completions": 10,
+     *   "current_streak": 3,
+     *   "best_streak": 7,
+     *   "completion_rate_30_days": 85.5,
+     *   "last_completed_at": "2025-10-29T10:00:00.000000Z",
+     *   "is_completed_today": true
+     * }
      */
-    public function stats(Habit $habit): JsonResponse
+    public function stats(Habit $habit): HabitStatsResource
     {
-        $this->authorize('view', $habit);
+        $stats = $this->habitService->getHabitStats($habit);
 
-        $stats = [
-            'total_completions' => $habit->total_completions,
-            'current_streak' => $habit->streak,
-            'best_streak' => $habit->best_streak,
-            'completion_rate_30_days' => $habit->getCompletionRate(30),
-            'last_completed_at' => $habit->last_completed_at,
-            'is_completed_today' => $habit->isCompletedToday(),
-        ];
-
-        return response()->json($stats);
+        return new HabitStatsResource($stats);
     }
 }

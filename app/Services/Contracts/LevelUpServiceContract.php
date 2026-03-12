@@ -15,4 +15,3 @@ interface LevelUpServiceContract
      */
     public function processLevelUp(UserHero $hero): bool;
 }
-

@@ -6,12 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\SocialLoginRequest;
-use App\Http\Resources\UserResource;
-use App\Models\User;
-use App\Services\GamificationService;
+use App\Http\Resources\Auth\LoginResource;
+use App\Http\Resources\Auth\MeResource;
+use App\Http\Resources\MessageResource;
+use App\Services\Contracts\AuthServiceContract;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 /**
  * @group Authentication
@@ -20,6 +20,13 @@ use Illuminate\Support\Facades\Hash;
  */
 class AuthController extends Controller
 {
+    /**
+     * AuthController constructor.
+     */
+    public function __construct(
+        protected AuthServiceContract $authService
+    ) {}
+
     /**
      * Register a new user
      *
@@ -51,31 +58,14 @@ class AuthController extends Controller
      *   }
      * }
      */
-    public function register(RegisterRequest $request, GamificationService $gamification): JsonResponse
+    public function register(RegisterRequest $request): JsonResponse
     {
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'provider' => 'email',
-            'locale' => $request->locale ?? 'en',
-        ]);
+        $result = $this->authService->register($request->validated());
+        $result['message'] = 'User registered successfully';
 
-        // ⚡ ONBOARDING: Create first hero automatically
-        $firstHero = $gamification->createFirstHero($user);
-
-        $token = $user->createToken('auth-token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'User registered successfully',
-            'user' => new UserResource($user),
-            'token' => $token,
-            'first_hero' => [
-                'id' => $firstHero->id,
-                'name' => $firstHero->hero->name ?? 'Warrior',
-                'level' => $firstHero->level,
-            ],
-        ], 201);
+        return (new LoginResource($result))
+            ->response()
+            ->setStatusCode(201);
     }
 
     /**
@@ -101,21 +91,20 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request): JsonResponse
     {
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json([
-                'message' => 'Invalid credentials',
-            ], 401);
+        $result = $this->authService->login($request->only('email', 'password'));
+
+        if (! $result) {
+            return (new MessageResource('Invalid credentials'))
+                ->response()
+                ->setStatusCode(401);
         }
 
-        $user = Auth::user();
-        $token = $user->createToken('auth-token')->plainTextToken;
+        $result['message'] = 'Login successful';
+        $result['token_type'] = 'Bearer';
 
-        return response()->json([
-            'message' => 'Login successful',
-            'user' => new UserResource($user),
-            'token' => $token,
-            'token_type' => 'Bearer',
-        ]);
+        return (new LoginResource($result))
+            ->response()
+            ->setStatusCode(200);
     }
 
     /**
@@ -141,65 +130,16 @@ class AuthController extends Controller
      *   "token": "1|abc123xyz456..."
      * }
      */
-    public function socialLogin(SocialLoginRequest $request, GamificationService $gamification): JsonResponse
+    public function socialLogin(SocialLoginRequest $request): JsonResponse
     {
-        $providerIdField = $request->provider . '_id';
+        $result = $this->authService->socialLogin($request->validated());
 
-        // Try to find user by provider ID first
-        $user = User::where($providerIdField, $request->provider_id)->first();
+        $isNewUser = $result['is_new_user'];
+        $result['message'] = $isNewUser ? 'User created successfully' : 'Login successful';
 
-        $isNewUser = false;
-        $firstHero = null;
-
-        if (!$user) {
-            // If not found by provider ID, try to find by email (link existing account)
-            if ($request->email) {
-                $user = User::where('email', $request->email)->first();
-
-                if ($user) {
-                    // Link this social provider to existing user
-                    $user->update([
-                        $providerIdField => $request->provider_id,
-                        'avatar' => $request->avatar ?? $user->avatar,
-                    ]);
-                }
-            }
-
-            // If still no user, create a new one
-            if (!$user) {
-                $user = User::create([
-                    'name' => $request->name,
-                    'email' => $request->email,
-                    $providerIdField => $request->provider_id,
-                    'provider' => $request->provider,
-                    'avatar' => $request->avatar,
-                    'locale' => $request->locale ?? 'en',
-                ]);
-                $isNewUser = true;
-
-                // ⚡ ONBOARDING: Create first hero for new user
-                $firstHero = $gamification->createFirstHero($user);
-            }
-        }
-
-        $token = $user->createToken('auth-token')->plainTextToken;
-
-        $response = [
-            'message' => $isNewUser ? 'User created successfully' : 'Login successful',
-            'user' => new UserResource($user),
-            'token' => $token,
-            'is_new_user' => $isNewUser,
-        ];
-
-        if ($firstHero) {
-            $response['first_hero'] = [
-                'id' => $firstHero->id,
-                'name' => $firstHero->hero->name ?? 'Warrior',
-                'level' => $firstHero->level,
-            ];
-        }
-
-        return response()->json($response, $isNewUser ? 201 : 200);
+        return (new LoginResource($result))
+            ->response()
+            ->setStatusCode($isNewUser ? 201 : 200);
     }
 
     /**
@@ -215,16 +155,11 @@ class AuthController extends Controller
      */
     public function logout(): JsonResponse
     {
-        $token = Auth::user()->currentAccessToken();
+        $this->authService->logout(Auth::user());
 
-        // Check if it's not a transient token (used in tests with Sanctum::actingAs)
-        if ($token && !($token instanceof \Laravel\Sanctum\TransientToken)) {
-            $token->delete();
-        }
-
-        return response()->json([
-            'message' => 'Logout successful',
-        ]);
+        return (new MessageResource('Logout successful'))
+            ->response()
+            ->setStatusCode(200);
     }
 
     /**
@@ -248,8 +183,8 @@ class AuthController extends Controller
      */
     public function me(): JsonResponse
     {
-        return response()->json([
-            'user' => new UserResource(Auth::user()),
-        ]);
+        return (new MeResource(Auth::user()))
+            ->response()
+            ->setStatusCode(200);
     }
 }

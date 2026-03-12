@@ -3,116 +3,147 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\MessageResource;
 use App\Http\Resources\UserHeroResource;
 use App\Models\Hero;
 use App\Models\UserHero;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Services\Contracts\UserHeroServiceContract;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * @group User Heroes
+ *
+ * APIs for managing user-specific heroes, unlocking and activating them.
+ */
 class UserHeroController extends Controller
 {
-    use AuthorizesRequests;
+    /**
+     * UserHeroController constructor.
+     */
+    public function __construct(
+        protected UserHeroServiceContract $userHeroService
+    ) {}
 
     /**
-     * @OA\Get(
-     *     path="/user/heroes",
-     *     tags={"User Heroes"},
-     *     summary="Get user's heroes",
-     *     description="User's heroes",
-     *     security={{"bearerAuth":{}}},
+     * Get user's heroes
      *
-     *     @OA\Response(response=200, description="List of user's heroes")
-     * )
+     * Returns a list of all heroes owned or unlocked by the authenticated user.
+     *
+     * @authenticated
+     *
+     * @response 200 {
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "level": 5,
+     *       "experience": 450,
+     *       "is_active": true,
+     *       "hero": {
+     *         "id": 1,
+     *         "name": "Warrior"
+     *       }
+     *     }
+     *   ]
+     * }
      */
     public function index(): AnonymousResourceCollection
     {
-        $userHeroes = Auth::user()->userHeroes()->with('hero')->get();
+        $userHeroes = $this->userHeroService->getUserHeroes(Auth::user());
 
         return UserHeroResource::collection($userHeroes);
     }
 
     /**
-     * @OA\Get(
-     *     path="/user/heroes/active",
-     *     tags={"User Heroes"},
-     *     summary="Get active hero",
-     *     description="Current active hero",
-     *     security={{"bearerAuth":{}}},
+     * Get active hero
      *
-     *     @OA\Response(response=200, description="Active hero")
-     * )
+     * Returns the user's currently active hero.
+     *
+     * @authenticated
+     *
+     * @response 200 {
+     *   "data": {
+     *     "id": 1,
+     *     "level": 5,
+     *     "experience": 450,
+     *     "is_active": true,
+     *     "hero": {
+     *       "id": 1,
+     *       "name": "Warrior"
+     *     }
+     *   }
+     * }
+     * @response 404 {
+     *   "message": "No active hero"
+     * }
      */
     public function active(): UserHeroResource|JsonResponse
     {
-        $activeHero = Auth::user()->activeHero()->with('hero')->first();
+        $activeHero = $this->userHeroService->getActiveHero(Auth::user());
 
-        if (!$activeHero) {
-            return response()->json(['message' => 'No active hero'], 404);
+        if (! $activeHero) {
+            return (new MessageResource('No active hero'))
+                ->response()
+                ->setStatusCode(404);
         }
 
         return new UserHeroResource($activeHero);
     }
 
     /**
-     * @OA\Post(
-     *     path="/user/heroes/{hero}/unlock",
-     *     tags={"User Heroes"},
-     *     summary="Unlock hero",
-     *     description="Unlock a hero",
-     *     security={{"bearerAuth":{}}},
+     * Unlock hero
      *
-     *     @OA\Parameter(name="hero", in="path", required=true, @OA\Schema(type="integer")),
+     * Unlocked a new hero for the user.
      *
-     *     @OA\Response(response=201, description="Hero unlocked")
-     * )
+     * @authenticated
+     *
+     * @urlParam hero integer required The ID of the hero to unlock. Example: 1
+     *
+     * @response 201 {
+     *   "data": {
+     *     "id": 2,
+     *     "level": 1,
+     *     "experience": 0,
+     *     "is_unlocked": true,
+     *     "hero": {
+     *       "id": 2,
+     *       "name": "Mage"
+     *     }
+     *   }
+     * }
      */
     public function unlock(Hero $hero): UserHeroResource
     {
-        $userHero = Auth::user()->userHeroes()->firstOrCreate(
-            ['hero_id' => $hero->id],
-            [
-                'level' => 1,
-                'experience' => 0,
-                'is_unlocked' => true,
-                'stats' => $hero->stats,
-            ]
-        );
-
-        $userHero->load('hero');
+        $userHero = $this->userHeroService->unlockHero(Auth::user(), $hero);
 
         return new UserHeroResource($userHero);
     }
 
     /**
-     * @OA\Post(
-     *     path="/user/heroes/{userHero}/activate",
-     *     tags={"User Heroes"},
-     *     summary="Activate hero",
-     *     description="Activate a hero",
-     *     security={{"bearerAuth":{}}},
+     * Activate hero
      *
-     *     @OA\Parameter(name="userHero", in="path", required=true, @OA\Schema(type="integer")),
+     * Sets a specific hero as active for the authenticated user.
      *
-     *     @OA\Response(response=200, description="Hero activated")
-     * )
+     * @authenticated
+     *
+     * @urlParam userHero integer required The ID of the user hero record. Example: 1
+     *
+     * @response 200 {
+     *   "data": {
+     *     "id": 1,
+     *     "is_active": true,
+     *     "hero": {
+     *       "id": 1,
+     *       "name": "Warrior"
+     *     }
+     *   }
+     * }
      */
     public function activate(UserHero $userHero): UserHeroResource
     {
-        $this->authorize('update', $userHero);
+        $updatedHero = $this->userHeroService->activateHero(Auth::user(), $userHero);
 
-        // Deactivate all other heroes
-        Auth::user()->userHeroes()->update(['is_active' => false]);
-
-        // Activate this hero
-        $userHero->update([
-            'is_active' => true,
-            'last_active_at' => now(),
-        ]);
-
-        $userHero->load('hero');
-
-        return new UserHeroResource($userHero);
+        return new UserHeroResource($updatedHero);
     }
 }

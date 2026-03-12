@@ -3,38 +3,18 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
-use OpenApi\Attributes as OA;
+use App\Http\Resources\HealthResource;
 
 class HealthController extends Controller
 {
-    #[OA\Get(
-        path: '/health',
-        summary: 'Health check endpoint',
-        description: 'Checks API status. Does not require authentication.',
-        tags: ['System'],
-        responses: [
-            new OA\Response(
-                response: 200,
-                description: 'API is working normally',
-                content: new OA\JsonContent(
-                    properties: [
-                        new OA\Property(property: 'status', type: 'string', example: 'ok'),
-                        new OA\Property(property: 'timestamp', type: 'string', format: 'date-time', example: '2025-10-29T10:30:00.000000Z'),
-                        new OA\Property(property: 'version', type: 'string', example: '1.0.0'),
-                        new OA\Property(property: 'message', type: 'string', example: 'Habit Tracker API is running'),
-                    ]
-                )
-            ),
-        ]
-    )]
-    public function index(): JsonResponse
+    /**
+     * Health check endpoint.
+     *
+     * Returns the current API status, version, and a server timestamp.
+     * Does not require authentication.
+     */
+    public function index(): HealthResource
     {
-        return response()->json([
-            'status' => 'ok',
-            'timestamp' => now()->toISOString(),
-            'version' => '1.0.0',
-            'message' => 'Habit Tracker API is running',
-        ]);
+        return new HealthResource([]);
     }
 }

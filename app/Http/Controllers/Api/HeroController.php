@@ -4,73 +4,81 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\HeroResource;
-use App\Models\Hero;
+use App\Services\Contracts\HeroServiceContract;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
+/**
+ * @group Heroes
+ *
+ * APIs for viewing available heroes.
+ */
 class HeroController extends Controller
 {
     /**
-     * @OA\Get(
-     *     path="/heroes",
-     *     tags={"Heroes"},
-     *     summary="Get all heroes",
-     *     description="List of all available heroes",
-     *     security={{"bearerAuth":{}}},
+     * HeroController constructor.
+     */
+    public function __construct(
+        protected HeroServiceContract $heroService
+    ) {}
+
+    /**
+     * Get all heroes
      *
-     *     @OA\Parameter(
-     *         name="is_active",
-     *         in="query",
+     * Returns a list of all available heroes in the game.
      *
-     *         @OA\Schema(type="boolean")
-     *     ),
+     * @authenticated
      *
-     *     @OA\Response(
-     *         response=200,
-     *         description="List of heroes",
+     * @queryParam is_active boolean Filter by active status. Example: true
      *
-     *         @OA\JsonContent(
-     *             type="array",
-     *
-     *             @OA\Items(
-     *
-     *                 @OA\Property(property="id", type="integer"),
-     *                 @OA\Property(property="name", type="string"),
-     *                 @OA\Property(property="rarity", type="string"),
-     *                 @OA\Property(property="unlock_level", type="integer"),
-     *                 @OA\Property(property="is_premium", type="boolean")
-     *             )
-     *         )
-     *     )
-     * )
+     * @response 200 {
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "name": "Warrior",
+     *       "description": "Strong and brave",
+     *       "rarity": "common",
+     *       "unlock_level": 1,
+     *       "is_premium": false
+     *     }
+     *   ]
+     * }
      */
     public function index(): AnonymousResourceCollection
     {
-        $query = Hero::query();
-
-        if (request()->has('is_active')) {
-            $query->where('is_active', request()->boolean('is_active'));
-        }
-
-        $heroes = $query->orderBy('unlock_level')->get();
+        $filters = request()->only(['is_active']);
+        $heroes = $this->heroService->getHeroes($filters);
 
         return HeroResource::collection($heroes);
     }
 
     /**
-     * @OA\Get(
-     *     path="/heroes/{id}",
-     *     tags={"Heroes"},
-     *     summary="Get hero details",
-     *     description="Hero details",
-     *     security={{"bearerAuth":{}}},
+     * Get hero details
      *
-     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     * Returns detailed information about a specific hero.
      *
-     *     @OA\Response(response=200, description="Hero details")
-     * )
+     * @authenticated
+     *
+     * @urlParam id integer required The ID of the hero. Example: 1
+     *
+     * @response 200 {
+     *   "data": {
+     *     "id": 1,
+     *     "name": "Warrior",
+     *     "description": "Strong and brave",
+     *     "rarity": "common",
+     *     "unlock_level": 1,
+     *     "is_premium": false
+     *   }
+     * }
      */
-    public function show(Hero $hero): HeroResource
+    public function show(int $id): HeroResource
     {
+        $hero = $this->heroService->getHeroDetails($id);
+
+        if (! $hero) {
+            abort(404, 'Hero not found');
+        }
+
         return new HeroResource($hero);
     }
 }

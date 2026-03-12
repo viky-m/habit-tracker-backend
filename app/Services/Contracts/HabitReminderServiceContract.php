@@ -31,5 +31,14 @@ interface HabitReminderServiceContract
      * Mark reminder as sent
      */
     public function markAsSent(HabitReminder $reminder): void;
-}
 
+    /**
+     * Update reminder
+     */
+    public function updateReminder(HabitReminder $reminder, array $data): bool;
+
+    /**
+     * Delete reminder
+     */
+    public function deleteReminder(HabitReminder $reminder): bool;
+}

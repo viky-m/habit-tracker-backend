@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Habit;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class HabitSeeder extends Seeder
@@ -11,8 +11,9 @@ class HabitSeeder extends Seeder
     public function run(): void
     {
         $user = User::where('email', 'test@example.com')->first();
-        if (!$user)
+        if (! $user) {
             return;
+        }
 
         $habits = [
             [
@@ -48,7 +49,7 @@ class HabitSeeder extends Seeder
         foreach ($habits as $habitData) {
             Habit::create([
                 'user_id' => $user->id,
-                ...$habitData
+                ...$habitData,
             ]);
         }
     }

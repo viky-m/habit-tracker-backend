@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Habit;
+use App\Http\Resources\HabitReminderResource;
+use App\Http\Resources\MessageResource;
 use App\Models\HabitReminder;
 use App\Services\Contracts\HabitReminderServiceContract;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Services\Contracts\HabitServiceContract;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
  * @group Habit Reminders
@@ -17,10 +19,9 @@ use Illuminate\Http\Request;
  */
 class HabitReminderController extends Controller
 {
-    use AuthorizesRequests;
-
     public function __construct(
-        private HabitReminderServiceContract $reminderService
+        private HabitReminderServiceContract $reminderService,
+        private HabitServiceContract $habitService
     ) {}
 
     /**
@@ -42,11 +43,11 @@ class HabitReminderController extends Controller
      *   ]
      * }
      */
-    public function index(): JsonResponse
+    public function index(): AnonymousResourceCollection
     {
         $reminders = $this->reminderService->getUserReminders(auth()->user());
 
-        return response()->json(['data' => $reminders]);
+        return HabitReminderResource::collection($reminders);
     }
 
     /**
@@ -82,8 +83,13 @@ class HabitReminderController extends Controller
             'message' => ['sometimes', 'string', 'max:255'],
         ]);
 
-        $habit = Habit::findOrFail($validated['habit_id']);
-        $this->authorize('view', $habit);
+        $habit = $this->habitService->getHabitById($validated['habit_id']);
+
+        if (! $habit) {
+            return (new MessageResource('Habit not found'))
+                ->response()
+                ->setStatusCode(404);
+        }
 
         $reminder = $this->reminderService->createReminder(
             auth()->user(),
@@ -91,7 +97,9 @@ class HabitReminderController extends Controller
             $validated
         );
 
-        return response()->json(['data' => $reminder], 201);
+        return (new HabitReminderResource($reminder))
+            ->response()
+            ->setStatusCode(201);
     }
 
     /**
@@ -106,10 +114,8 @@ class HabitReminderController extends Controller
      *   }
      * }
      */
-    public function update(Request $request, HabitReminder $reminder): JsonResponse
+    public function update(Request $request, HabitReminder $reminder): HabitReminderResource
     {
-        $this->authorize('update', $reminder);
-
         $validated = $request->validate([
             'time' => ['sometimes', 'date_format:H:i'],
             'days' => ['sometimes', 'array'],
@@ -120,9 +126,9 @@ class HabitReminderController extends Controller
             'message' => ['sometimes', 'string', 'max:255'],
         ]);
 
-        $reminder->update($validated);
+        $this->reminderService->updateReminder($reminder, $validated);
 
-        return response()->json(['data' => $reminder]);
+        return new HabitReminderResource($reminder);
     }
 
     /**
@@ -134,12 +140,10 @@ class HabitReminderController extends Controller
      *   "message": "Reminder deleted successfully"
      * }
      */
-    public function destroy(HabitReminder $reminder): JsonResponse
+    public function destroy(HabitReminder $reminder): MessageResource
     {
-        $this->authorize('delete', $reminder);
+        $this->reminderService->deleteReminder($reminder);
 
-        $reminder->delete();
-
-        return response()->json(['message' => 'Reminder deleted successfully']);
+        return new MessageResource('Reminder deleted successfully');
     }
 }

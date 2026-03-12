@@ -60,4 +60,3 @@ class XpCalculator implements XpCalculatorContract
         return self::XP_PER_LEVEL * $level + (int) (pow($level, self::LEVEL_EXPONENT) * self::LEVEL_MULTIPLIER);
     }
 }
-

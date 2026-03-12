@@ -5,7 +5,7 @@ use App\Services\XpCalculator;
 
 test('xp calculator returns base XP for habit with no streak', function () {
     $habit = Habit::factory()->make(['streak' => 0]);
-    $calculator = new XpCalculator();
+    $calculator = new XpCalculator;
 
     $xp = $calculator->calculate($habit);
 
@@ -14,7 +14,7 @@ test('xp calculator returns base XP for habit with no streak', function () {
 
 test('xp calculator adds bonus for streak over 3 days', function () {
     $habit = Habit::factory()->make(['streak' => 6]);
-    $calculator = new XpCalculator();
+    $calculator = new XpCalculator;
 
     $xp = $calculator->calculate($habit);
 
@@ -24,7 +24,7 @@ test('xp calculator adds bonus for streak over 3 days', function () {
 
 test('xp calculator adds correct bonus for long streak', function () {
     $habit = Habit::factory()->make(['streak' => 12]);
-    $calculator = new XpCalculator();
+    $calculator = new XpCalculator;
 
     $xp = $calculator->calculate($habit);
 
@@ -33,7 +33,7 @@ test('xp calculator adds correct bonus for long streak', function () {
 });
 
 test('xp calculator returns correct xp for level 2', function () {
-    $calculator = new XpCalculator();
+    $calculator = new XpCalculator;
 
     $xp = $calculator->getXpForLevel(2);
 
@@ -42,7 +42,7 @@ test('xp calculator returns correct xp for level 2', function () {
 });
 
 test('xp calculator returns correct xp for level 5', function () {
-    $calculator = new XpCalculator();
+    $calculator = new XpCalculator;
 
     $xp = $calculator->getXpForLevel(5);
 
@@ -51,7 +51,7 @@ test('xp calculator returns correct xp for level 5', function () {
 });
 
 test('xp calculator curve is exponential', function () {
-    $calculator = new XpCalculator();
+    $calculator = new XpCalculator;
 
     $level1 = $calculator->getXpForLevel(1);
     $level2 = $calculator->getXpForLevel(2);
@@ -60,4 +60,3 @@ test('xp calculator curve is exponential', function () {
     expect($level2)->toBeGreaterThan($level1);
     expect($level3 - $level2)->toBeGreaterThan($level2 - $level1);
 });
-

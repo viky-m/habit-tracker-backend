@@ -27,4 +27,3 @@ interface GamificationServiceContract
      */
     public function createFirstHero(User $user): UserHero;
 }
-
